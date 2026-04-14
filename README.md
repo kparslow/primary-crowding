@@ -9,28 +9,28 @@ This repository computes and visualizes how primary crowding changes candidates�
 - **Candidates and types.** There are $N$ candidates with valences $v_i \in \mathbb{R}$, drawn i.i.d. from $F$ with positive density. The realized profile $\mathbf v$ is observed by all candidates.
 - **Action.** Each candidate chooses $a_i \in \{0,1\}$. Choosing $a_i=1$ improves primary standing but imposes a general‑election penalty $\delta>0$.
 - **Primary stage.** Primary index: $q_i^P = v_i + a_i + \varepsilon_i$ with i.i.d. EV1 shocks. Nomination probability is multinomial logit:
-  \[ 
+  $$ 
   \Pr(w=i \mid \mathbf v, \mathbf a) = \frac{e^{v_i+a_i}}{\sum_j e^{v_j+a_j}}.
-  \]
+  $$
 - **General election.** If nominee $i$ wins the primary, general‑election index is $q_i^{GE}=v_i-\delta a_i+\eta_i$ with $\eta_i\sim N(0,1)$ and opponent normalized to 0. Win probability is $\Phi(v_i-\delta a_i)$.
 - **Payoff.** Expected payoff equals nomination probability times general‑election win probability.
 
 ### Reduced‑form incentive comparison
 Holding opponents fixed, summarize opponent strength by
-\[ 
+$$ 
 S \equiv \sum_{j\neq i} e^{v_j+a_j}.
-\]
+$$
 Define
-\[ 
+$$
 p_a(v;S)=\frac{e^{v+a}}{e^{v+a}+S},\quad
 G(v;S)=\frac{p_1(v;S)}{p_0(v;S)},\quad
 C(v;\delta)=\frac{\Phi(v)}{\Phi(v-\delta)}.
-\]
+$$
 The action is optimal iff
-\[ 
+$$
 \Delta(v;S)=p_1(v;S)\Phi(v-\delta)-p_0(v;S)\Phi(v) \ge 0
 \quad\Longleftrightarrow\quad G(v;S)\ge C(v;\delta).
-\]
+$$
 The **action region** is $A(S)=\{v: G(v;S)\ge C(v;\delta)\}$.
 
 ## Purpose of the numerical exercise
@@ -43,9 +43,9 @@ Key questions:
 
 ## Methodology (Appendix B)
 The numerical exercise evaluates
-\[ 
+$$ 
 H(v)=G(v;S)-C(v;\delta)
-\]
+$$
 on a dense grid and classifies the action set by counting zero‑crossings.
 
 **Parameter grid**
@@ -69,20 +69,15 @@ on a dense grid and classifies the action set by counting zero‑crossings.
 - **No interior‑interval or multi‑crossing structures** were observed in the tested range.
 - **Regime boundary is S‑invariant**: $\delta^*\approx 0.10$ for all tested $S$ (std. dev. < 0.0001).
 - **Comparative statics (screening regime):**
-\[ 
+$$ 
 v^*(S,\delta)\approx 18.5\,\delta-0.003\,S\quad (R^2=0.98).
-\]
+$$
   Penalty effects dominate crowding effects in magnitude, but crowding still shifts the participation margin.
 
 ## How proofs and comparative statics are computed
 - **Analytical proofs** establish monotonicity and tail behavior of $G(v;S)$ and $C(v;\delta)$, yielding the left‑tail guarantee and comparative statics for the action region.
 - **Numerical verification** (Appendix B) implements grid‑based evaluation of $H(v)$ across 9,950 parameter pairs, classifies action‑set structure by zero‑crossings, and estimates $v^*(S,\delta)$ by interpolation and regression.
 - **Comparative statics** are computed by regressing extracted cutoffs on $(\delta,S)$ in the screening regime and by verifying monotonic inclusion of action sets across $S$ and $\delta$.
-
-## Repository contents
-- `ConferenceDraft.tex`: Full model, proofs, and appendices.
-- `figures/`: Numerical output figures (phase diagram, H‑curves, cutoff plots).
-- Code files (if present): scripts used to generate grids, zero‑crossings, and figures.
 
 ## Citation
 If you use this code or results, please cite: 
