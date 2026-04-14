@@ -8,10 +8,7 @@ This repository computes and visualizes how primary crowding changes candidates�
 ## Theoretical model (brief)
 - **Candidates and types.** There are $N$ candidates with valences $v_i \in \mathbb{R}$, drawn i.i.d. from $F$ with positive density. The realized profile $\mathbf v$ is observed by all candidates.
 - **Action.** Each candidate chooses $a_i \in \{0,1\}$. Choosing $a_i=1$ improves primary standing but imposes a general‑election penalty $\delta>0$.
-- **Primary stage.** Primary index: $q_i^P = v_i + a_i + \varepsilon_i$ with i.i.d. EV1 shocks. Nomination probability is multinomial logit:
-  $ 
-  \Pr(w=i \mid \mathbf v, \mathbf a) = \frac{e^{v_i+a_i}}{\sum_j e^{v_j+a_j}}.
-  $
+- **Primary stage.** Primary index: $q_i^P = v_i + a_i + \varepsilon_i$ with i.i.d. EV1 shocks. Nomination probability is multinomial logit: $\Pr(w=i \mid \mathbf v, \mathbf a) = \frac{e^{v_i+a_i}}{\sum_j e^{v_j+a_j}}.$
 - **General election.** If nominee $i$ wins the primary, general‑election index is $q_i^{GE}=v_i-\delta a_i+\eta_i$ with $\eta_i\sim N(0,1)$ and opponent normalized to 0. Win probability is $\Phi(v_i-\delta a_i)$.
 - **Payoff.** Expected payoff equals nomination probability times general‑election win probability.
 
