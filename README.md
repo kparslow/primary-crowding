@@ -14,20 +14,14 @@ This repository computes and visualizes how primary crowding changes candidates�
 
 ### Reduced‑form incentive comparison
 Holding opponents fixed, summarize opponent strength by
-$ 
-S \equiv \sum_{j\neq i} e^{v_j+a_j}.
-$
+$S \equiv \sum_{j\neq i} e^{v_j+a_j}.$
 Define
-$
-p_a(v;S)=\frac{e^{v+a}}{e^{v+a}+S},\quad
+$p_a(v;S)=\frac{e^{v+a}}{e^{v+a}+S},\quad
 G(v;S)=\frac{p_1(v;S)}{p_0(v;S)},\quad
-C(v;\delta)=\frac{\Phi(v)}{\Phi(v-\delta)}.
-$
+C(v;\delta)=\frac{\Phi(v)}{\Phi(v-\delta)}.$
 The action is optimal iff
-$
-\Delta(v;S)=p_1(v;S)\Phi(v-\delta)-p_0(v;S)\Phi(v) \ge 0
-\quad\Longleftrightarrow\quad G(v;S)\ge C(v;\delta).
-$
+$\Delta(v;S)=p_1(v;S)\Phi(v-\delta)-p_0(v;S)\Phi(v) \ge 0
+\quad\Longleftrightarrow\quad G(v;S)\ge C(v;\delta).$
 The **action region** is $A(S)=\{v: G(v;S)\ge C(v;\delta)\}$.
 
 ## Purpose of the numerical exercise
@@ -39,11 +33,7 @@ Key questions:
 - How do cutoffs move with $S$ and $\delta$?
 
 ## Methodology (Appendix B)
-The numerical exercise evaluates
-$ 
-H(v)=G(v;S)-C(v;\delta)
-$
-on a dense grid and classifies the action set by counting zero‑crossings.
+The numerical exercise evaluates $H(v)=G(v;S)-C(v;\delta)$ on a dense grid and classifies the action set by counting zero‑crossings.
 
 **Parameter grid**
 - $\delta \in [0.01,0.50]$ (step 0.01; 50 values)
@@ -66,9 +56,7 @@ on a dense grid and classifies the action set by counting zero‑crossings.
 - **No interior‑interval or multi‑crossing structures** were observed in the tested range.
 - **Regime boundary is S‑invariant**: $\delta^*\approx 0.10$ for all tested $S$ (std. dev. < 0.0001).
 - **Comparative statics (screening regime):**
-$ 
-v^*(S,\delta)\approx 18.5\,\delta-0.003\,S\quad (R^2=0.98).
-$
+  $v^*(S,\delta)\approx 18.5\,\delta-0.003\,S\quad (R^2=0.98).$
   Penalty effects dominate crowding effects in magnitude, but crowding still shifts the participation margin.
 
 ## How proofs and comparative statics are computed
