@@ -85,4 +85,5 @@ v^*(S,\delta)\approx 18.5\,\delta-0.003\,S\quad (R^2=0.98).
 - Code files (if present): scripts used to generate grids, zero‑crossings, and figures.
 
 ## Citation
-If you use this code or results, please cite the paper draft in `ConferenceDraft.tex`.
+If you use this code or results, please cite: 
+Parslow, Katherine (2026). ``Crowded Primaries and Weakened Nominees: How Competition Distorts Candidate Behavior." Working Paper.
