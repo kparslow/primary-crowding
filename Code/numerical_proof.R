@@ -1,13 +1,10 @@
 ################################################################################
-################## Numerical Proof for Proposition 5 ##########################
+################ Numerical Characterization of Action Set ######################
 ################################################################################
 
-# Last updated: 4/13/2026, 7:30 AM
+# Last updated: 4/14/26, 10:28 PM
 # Author: Katherine Parslow
 #
-# From paper [Appendix]: "For Proposition 5 I supply a proof sketch...
-# a full, detailed classification... requires additional technical lemmas...
-# and is ongoing work."
 #
 # PURPOSE: Characterize action set structures A(S) = {v : H(v) ≥ 0}
 #          across comprehensive parameter space
@@ -72,10 +69,10 @@ cat(sprintf("  H(0, 3, 0.15) = %.4f\n\n", H(0, 3, 0.15)))
 cat("Part 2: Establishing computational bounds...\n\n")
 
 # Fixed range: [-10, 10]
-# From paper [Section 2]: "Candidate valence vi is drawn independently for 
+# :"Candidate valence vi is drawn independently for 
 # each candidate i from a distribution F with strictly positive density f on R"
 # 
-# We test v ∈ [-10, 10], covering >99.999% under F=N(0,4)
+# Test v ∈ [-10, 10], covering >99.999% under F=N(0,4)
 v_min <- -10
 v_max <- 10
 
@@ -116,7 +113,7 @@ analyze_structure <- function(delta, S, step = 0.1, v_range = c(v_min, v_max)) {
   H_right <- H_vals[length(H_vals)]
   
   # Classify structure
-  # From paper [Definition 4]: "The action region is A(S) ≡ {v ∈ R : G(v; S) ≥ C(v; δ)}"
+  # "The action region is A(S) ≡ {v ∈ R : G(v; S) ≥ C(v; δ)}"
   structure <- "Unknown"
   action_set <- "Unknown"
   regime <- "Unknown"
@@ -204,11 +201,11 @@ analyze_structure <- function(delta, S, step = 0.1, v_range = c(v_min, v_max)) {
 cat("Part 3: Exploring parameter space...\n\n")
 
 
-# From paper [Section 2]: "δ > 0 is the general-election penalty"
-# From paper [Section 3]: "S ≡ ∑j≠i e^(vj+aj)" (aggregate opponent strength)
+# "δ > 0 is the general-election penalty"
+# "S ≡ ∑j≠i e^(vj+aj)" (aggregate opponent strength)
 
-# From paper: "increasing primary crowding — summarized by a larger opponents' 
-# strength scalar S" [Primary_Competition_(9).pdf]
+# "increasing primary crowding — summarized by a larger opponents' 
+# strength scalar S" 
 # 
 # With v ∈ [-10,10], feasible S depends on number of candidates N:
 #   N=3 (duopoly): S ≈ 2-40 (both opponents with v ∈ [-6,6])
@@ -309,7 +306,7 @@ cat(sprintf("  Union:                %4d cases (%.1f%%)\n\n",
             union, 100*union/nrow(results)))
 
 # Parameter dependence
-# From paper [Proposition 5]: "Then there exists v(S) ∈ R such that a*(v; S) = 0 
+# "Then there exists v(S) ∈ R such that a*(v; S) = 0 
 # for all v < v(S)"
 cat("Parameter dependence:\n\n")
 low_delta <- results[results$delta <= 0.05, ]
