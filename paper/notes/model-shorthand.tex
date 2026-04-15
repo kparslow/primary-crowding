@@ -10,38 +10,98 @@
 \maketitle
 
 \section*{Model \& Notation}
-\begin{itemize}
-    \item $N \ge 2$ candidates compete for party nomination.
-    \item Candidates have valence $v_i \in \R$ drawn i.i.d. from distribution $F$ with strictly positive density $f$ on $\R$. The vector $\vprof = \{v_1,...,v_N\}$ is drawn at the start of the game and is observed by all candidates.
-    \item Candidates choose whether to take action $a_i = \{0,1\}$, which boosts their relative standing in the primary election but harms their viability in the next-stage general election.
-    \item Candidates are ranked according to their primary index
-    \[
-        q_i^P = v_i + a_i + \varepsilon_i
-    \]
-   where $\varepsilon\sim$ EV1 are i.i.d.\ candidate-level shocks. The nominee, denoted $w$, is determined by the candidate with the highest primary index. Integrating over $\varepsilon_i$ results in a probability of nomination for candidate $i$ given by
-   \[
-    \Pr(w = i \mid \vprof, \aprof) = \frac{\ex{v_i + a_i}}{\sum_{j=1}^N \ex{v_j + a_j}}
-   \]
-   \item The nominee $w$ advances to the general election where their general-election index is
-   \[
-        q_i^{GE} = v_i - \delta\ a_i + \eta_i
-   \]
-   where $\eta_i \sim N(0,1)$ is an idiosyncratic shock. Note that primary and general election shocks are independent of each other. I normalize the out-party opponent's index to $0$ and the probability of nominee $w$ winning the general election is
-   \[
-        \Pr(\GE\ win \mid v_w, a_w) = \Pge{v_w}{\delta}{a_w}
-   \]
-   \item Candidates are office-motivated and receive payoffs of $1$ from winning office and $0$ otherwise. Because holding office requires winning both the primary and general elections, candidate $i$'s expected utility is given by
-   \begin{align*}
-        u_i(\vprof, \aprof) &= \Pr(w = i \mid \vprof, \aprof)\cdot \Pr(\GE\ win \mid v_i, a_i)\\
-        &= \frac{\ex{v_i + a_i}}{\sum_{j=1}^N \ex{v_j+a_j}} \cdot \Pge{v_i}{\delta}{a_i} 
-   \end{align*}
-   \item The timing of the game is as follows:
-   \begin{enumerate}
-       \item Nature draws the vector of valences $\vprof = (v_1,...,v_N)$;
-       \item Candidates observe $\vprof$ and choose $a_i \in \{0,1\}$ for all $i$;
-       \item The primary election outcome is realized and the party nominee is selected;
-       \item The general-election outcome is realized and payoffs are determined.
-   \end{enumerate}
-\end{itemize}
+
+\subsection*{Setup}
+
+$N \ge 2$ candidates compete for a party's nomination.
+Each candidate $i$ has valence $v_i \in \R$, drawn i.i.d.\ from distribution $F$
+with strictly positive density $f$ on $\R$.
+The valence profile $\vprof = (v_1,\dots,v_N)$ is drawn by nature at the start of the game
+and is observed by all candidates.
+
+Candidates simultaneously choose an action $a_i \in \{0,1\}$.
+Taking action ($a_i = 1$) boosts a candidate's relative standing in the primary
+but harms their viability in the subsequent general election.
+Let $\aprof = (a_1,\dots,a_N)$ denote the action profile.
+
+\subsection*{Primary Election}
+
+Candidates are ranked according to their \emph{primary index}
+\begin{equation}
+    q_i^P = v_i + a_i + \varepsilon_i,
+    \label{eq:primary-index}
+\end{equation}
+where $\varepsilon_i \sim \text{EV1}$ are i.i.d.\ candidate-level shocks.
+The nominee, denoted $w$, is the candidate with the highest primary index.
+
+Define the \emph{opponent-strength aggregator} for candidate $i$ as
+\[
+    \Sof{\vminus}{\aminus} = \sum_{j \neq i} \ex{v_j + a_j}.
+\]
+Integrating over the EV1 shocks, the probability that candidate $i$ wins the nomination is
+\begin{equation}
+    \Pr(w = i \mid \vprof, \aprof)
+        = \pnomrf{a_i}{v_i}{\Sof{\vminus}{\aminus}}.
+    \label{eq:primary-prob}
+\end{equation}
+We write this more compactly as $\pnom{a_i}{v_i}{\Sof{\vminus}{\aminus}}$,
+with the special cases $\pOne{v_i}{\Sof{\vminus}{\aminus}}$ when $a_i = 1$
+and $\pZero{v_i}{\Sof{\vminus}{\aminus}}$ when $a_i = 0$.
+
+\subsection*{General Election}
+
+The nominee $w$ advances to the general election.
+Their \emph{general-election index} is
+\begin{equation}
+    q_w^{\GE} = v_w - \delta\, a_w + \eta_w,
+    \label{eq:ge-index}
+\end{equation}
+where $\eta_w \sim N(0,1)$ is an idiosyncratic shock independent of the primary shocks,
+and $\delta > 0$ captures the cost of primary electioneering.
+Normalizing the out-party opponent's index to $0$, the probability that nominee $w$ wins the general election is
+\begin{equation}
+    \Pr(\GE\text{ win} \mid v_w, a_w) = \Pge{v_w}{\delta}{a_w}.
+    \label{eq:ge-prob}
+\end{equation}
+
+\subsection*{Payoffs}
+
+Candidates are office-motivated and receive a payoff of $1$ from holding office and $0$ otherwise.
+Because holding office requires winning both elections, candidate $i$'s expected utility is
+\begin{equation}
+    u_i(\vprof, \aprof)
+        = \pnom{a_i}{v_i}{\Sof{\vminus}{\aminus}} \cdot \Pge{v_i}{\delta}{a_i}.
+    \label{eq:utility}
+\end{equation}
+
+\subsection*{Timing}
+
+The timing of the game is as follows:
+\begin{enumerate}
+    \item Nature draws the valence profile $\vprof = (v_1,\dots,v_N)$;
+    \item Candidates observe $\vprof$ and simultaneously choose $a_i \in \{0,1\}$ for all $i$;
+    \item The primary election is held and the party nominee $w$ is selected according to \eqref{eq:primary-prob};
+    \item The general election is held and payoffs are determined according to \eqref{eq:ge-prob}.
+\end{enumerate}
+
+\subsection*{Notation Summary}
+
+\begin{center}
+\begin{tabular}{cl}
+    \hline
+    \textbf{Symbol} & \textbf{Description} \\
+    \hline
+    $N$ & Number of candidates \\
+    $v_i$ & Valence of candidate $i$; drawn i.i.d.\ from $F$ \\
+    $\vprof = (v_1,\dots,v_N)$ & Valence profile \\
+    $a_i \in \{0,1\}$ & Candidate $i$'s primary-electioneering action \\
+    $\aprof = (a_1,\dots,a_N)$ & Action profile \\
+    $\delta > 0$ & Cost of taking the primary action in the general election \\
+    $\Sof{\vminus}{\aminus}$ & Opponent-strength aggregator $\sum_{j\neq i}\exp(v_j+a_j)$ \\
+    $\pnom{a}{v}{S}$ & Nomination probability for action $a$, valence $v$, aggregator $S$ \\
+    $\Phi(\cdot)$ & Standard normal CDF; used for GE win probability \\
+    \hline
+\end{tabular}
+\end{center}
 
 \end{document}
