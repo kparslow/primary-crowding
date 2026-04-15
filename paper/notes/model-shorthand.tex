@@ -1,0 +1,132 @@
+\documentclass[12pt]{article}
+\usepackage[margin = 1in]{geometry} % set margins
+\usepackage{amsmath, % math formatting
+            amsfonts, % math fonts
+            amssymb,  % extends math symbols
+            mathtools, % additional math formatting
+            bbm,
+            amsthm
+}
+\usepackage{comment, % comments out large sections
+            setspace, % line spacing
+            hyperref % hyperlinks
+}
+
+% set spacing
+\onehalfspacing
+
+\setcounter{secnumdepth}{0}
+
+% theorem environments (global numbering)
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{prop}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{definition}[theorem]{Definition}
+
+% =======================================
+%             MACROS
+% =======================================
+% Math operators
+\DeclareMathOperator{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+
+% Distribution / functions
+\newcommand{\PhiStd}{\Phi}          % standard normal CDF
+\newcommand{\phiStd}{\phi}          % standard normal PDF
+\newcommand{\ex}[1]{\exp\!\left(#1\right)}  % exp with nice spacing
+\newcommand{\logg}[1]{\log\!\left(#1\right)}% log with nice spacing
+
+% Vectors / profiles
+\newcommand{\vprof}{\mathbf v}
+\newcommand{\aprof}{\mathbf a}
+\newcommand{\vminus}{\mathbf v_{-i}}
+\newcommand{\aminus}{\mathbf a_{-i}}
+
+% Winner
+\newcommand{\winner}[1]{w\!\left(#1\right)} % w(a)
+\newcommand{\GE}{\text{GE}}
+
+% Reduced-form objects
+\newcommand{\Sagg}{S} % use \Sagg for the symbol
+
+% Opponent strength aggregator S(v_-i, a_-i)
+\newcommand{\Sof}[2]{\Sagg\!\left(#1,#2\right)} % S(v_-i,a_-i)
+
+% Primary nomination probability p_a(v;S)
+% Usage: \pnom{a}{v}{S}
+\newcommand{\pnom}[3]{p_{#1}\!\left(#2;#3\right)}
+
+% Closed-form nomination probability for generic a in {0,1}
+% Usage: \pnomrf{a}{v}{S}
+\newcommand{\pnomrf}[3]{\frac{\ex{#2+#1}}{\ex{#2+#1}+#3}}
+
+% Shorthands p1 and p0 as functions of (v;S)
+\newcommand{\pOne}[2]{p_{1}\!\left(#1;#2\right)}
+\newcommand{\pZero}[2]{p_{0}\!\left(#1;#2\right)}
+
+% Explicit closed forms:
+\newcommand{\pOneRF}[2]{\frac{\ex{#1+1}}{\ex{#1+1}+#2}}
+\newcommand{\pZeroRF}[2]{\frac{\ex{#1}}{\ex{#1}+#2}}
+
+% Primary proportional benefit G(v;S) = p1/p0
+\newcommand{\Gfun}[2]{G\!\left(#1;#2\right)}
+
+% General proportional cost C(v;delta) = Phi(v)/Phi(v-delta)
+\newcommand{\Cfun}[2]{C\!\left(#1;#2\right)}
+
+% Delta incentive object: Delta(v;S) = p1*Phi(v-delta) - p0*Phi(v)
+\newcommand{\Deltainc}[2]{\Delta\!\left(#1;#2\right)}
+
+% General-election win probability
+% Usage: \Pge{v}{delta}{a} -> Phi(v - delta a)
+\newcommand{\Pge}[3]{\PhiStd\!\left(#1-#2\,#3\right)}
+
+% Useful comparisons / relations
+\newcommand{\iffc}{\;\Longleftrightarrow\;}
+
+% ---------------------------------------------
+\title{Crowded Primaries and Weakened Nominees: Behavioral Distortion in a Two-Stage Electoral Contest}
+\author{Katherine Parslow}
+\date{Last Updated: \today}
+
+\begin{document}
+\maketitle
+
+\section*{Model \& Notation}
+\begin{itemize}
+    \item $N \ge 2$ candidates compete for party nomination.
+    \item Candidates have valence $v_i \in \R$ drawn i.i.d. from distribution $F$ with strictly positive density $f$ on $\R$. The vector $\vprof = \{v_1,...,v_N\}$ is drawn at the start of the game and is observed by all candidates.
+    \item Candidates choose whether to take action $a_i = \{0,1\}$, which boosts their relative standing in the primary election but harms their viability in the next-stage general election.
+    \item Candidates are ranked according to their primary index
+    \[
+        q_i^P = v_i + a_i + \varepsilon_i
+    \]
+   where $\varepsilon\sim$ EV1 are i.i.d.\ candidate-level shocks. The nominee, denoted $w$, is determined by the candidate with the highest primary index. Integrating over $\varepsilon_i$ results in a probability of nomination for candidate $i$ given by
+   \[
+    \Pr(w = i \mid \vprof, \aprof) = \frac{\ex{v_i + a_i}}{\sum_{j=1}^N \ex{v_j + a_j}}
+   \]
+   \item The nominee $w$ advances to the general election where their general-election index is
+   \[
+        q_i^{GE} = v_i - \delta\ a_i + \eta_i
+   \]
+   where $\eta_i \sim N(0,1)$ is an idiosyncratic shock. Note that primary and general election shocks are independent of each other. I normalize the out-party opponent's index to $0$ and the probability of nominee $w$ winning the general election is
+   \[
+        \Pr(\GE\ win \mid v_w, a_w) = \Pge{v_w}{\delta}{a_w}
+   \]
+   \item Candidates are office-motivated and receive payoffs of $1$ from winning office and $0$ otherwise. Because holding office requires winning both the primary and general elections, candidate $i$'s expected utility is given by
+   \begin{align*}
+        u_i(\vprof, \aprof) &= \Pr(w = i \mid \vprof, \aprof)\cdot \Pr(\GE\ win \mid v_i, a_i)\\
+        &= \frac{\ex{v_i + a_i}}{\sum_{j=1}^N \ex{v_j+a_j}} \cdot \Pge{v_i}{\delta}{a_i} 
+   \end{align*}
+   \item The timing of the game is as follows:
+   \begin{enumerate}
+       \item Nature draws the vector of valences $\vprof = (v_1,...,v_N)$;
+       \item Candidates observe $\vprof$ and choose $a_i \in \{0,1\}$ for all $i$;
+       \item The primary election outcome is realized and the party nominee is selected;
+       \item The general-election outcome is realized and payoffs are determined.
+   \end{enumerate}
+\end{itemize}
+
+\end{document}
