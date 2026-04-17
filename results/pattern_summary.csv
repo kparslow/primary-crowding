@@ -1,0 +1,3 @@
+action_structure,n_cases,mean_n_zeros,H_left_mean,H_right_mean,left_sign,right_sign
+no_zero_all_positive,900,0,1.0012943627443431,0.002892050443661995,positive,positive
+upper_tail_only,4100,1,-39.8263565481996,0.0028920504436619923,negative,positive
