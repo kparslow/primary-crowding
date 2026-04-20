@@ -6,7 +6,7 @@
 # 1D grids
 # ------------------------
 
-# For calibration / economically relevant parameter scaling, we assume intrinsic valence
+# For calibration / economically relevant parameter scaling, assume intrinsic valence
 # v ~ N(0, sigma^2), where sigma is the standard deviation of candidate valence.
 # Since v and the general-election penalty delta enter the GE index in the same units,
 # we report/grids delta in "sigma units" (e.g., delta = 1*sigma).
@@ -54,6 +54,8 @@ grid_logS_delta <- function(
   delta_vec <- grid_delta(delta_min, delta_max, n_delta)
   
   df <- expand_grid_df(logS = logS_vec, delta = delta_vec)
+  
+  # Convert from log scale to level scale used in model.R: S = exp(logS)
   df$S <- exp(df$logS)
   df
 }
