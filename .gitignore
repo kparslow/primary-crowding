@@ -50,3 +50,6 @@ rsconnect/
 
 # Build
 paper/notes/tech/build/
+
+# Generated simulation output (do not commit)
+computational/output/
