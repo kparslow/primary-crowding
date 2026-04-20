@@ -1,0 +1,36 @@
+The model formalizes the tension between primary competitiveness and general-election viability in a two-stage electoral environment. Candidates must first win a party nomination and then prevail in a general election against an opposing party candidate. The key feature of the model is that candidates can take an action that improves their performance in the primary but reduces their appeal in the general election. The analysis asks how the competitiveness of the primary field alters the incentive to take this action, and what this implies for equilibrium behavior when all candidates observe each other’s underlying strengths.
+
+\paragraph{Types and information.}
+Each candidate $i \in \{1,...,N\}$ has an intrinsic valence $v_i \in \R$, drawn i.i.d. from a distribution $F$ with strictly positive density $f$ on $\R$. Valence captures fundamental, publicly observable attributes that voters value in elections (e.g., competence, local reputation, baseline campaign quality). Let $\vprof = (v_1,...,v_N)$ denote the realized valence profile. The profile $\vprof$ is observed by all candidates before they choose their actions. The full-information assumption abstracts from signaling motives and focuses the analysis on pure behavior distortions induced by the two-stage electoral structure.
+
+\paragraph{Timing and actions.}
+After observing $\vprof$, candidates simultaneously choose a binary action $a_i \in \{0,1\}$. The action is a reduced-form representation of primary-focused behavior. For example, this may be reallocating campaign resources to the primary at the expense of general-election spending, aggressive or negative intraparty tactics, latching on to extreme cultural positions, etc. Concretely, $a_i = 1$ increases a candidate's effectiveness in the primary but poses a penalty on general-election viability. Timing is as follows: (i) Nature draws $\vprof$; (ii) candidates observe $\vprof$ and simultaneously choose $\aprof$; (iii) the primary outcome is realized and the party nominee is selected; (iv) the general-election outcome is realized. 
+
+\paragraph{Primary stage.}
+Primary voters evaluate candidates using a stage-specific index
+\[
+    q_i^{P} = v_i + a_i + \varepsilon_i,
+\]
+where $\varepsilon_i$ is an idiosyncratic shock. I assume $\{\varepsilon_i\}_{i=1}^N$ are i.i.d.\ type-I extreme value (EV1). Primary voters select the candidate with the highest primary index. Ties occur with probability zero. Integrating over $\varepsilon$ yields multinomial logit nomination probabilities:
+\[
+    \Pr\big(\winner{\aprof} =i\mid \vprof, \aprof \big) = \frac{e^{v_i + a_i}}{\sum_{j=1}^N e^{v_j+a_j}}
+\]
+The action's primary-stage effect is normalized to one unit of index. Any constant marginal benefit can be rescaled to this unit without loss of generality. Note that the primary is a \emph{relative} contest: a candidate's winning probability depends on his effective index relative to the rest of the field.
+
+\paragraph*{General election.}
+If candidate $i$ becomes the nominee, his performance in the general election is governed by the general-election index
+\[
+    q_i^{GE} = v_i - \delta a_i + \eta_i,
+\]
+where $\delta > 0$ is the general-election penalty associated with taking the action and $\eta_i\sim N(0,1)$ is an idiosyncratic general-election shock. The opposing party's index is normalized to zero, so the nominee $w$ wins the general election with probability
+\[
+    \Pr(\GE\ win \mid v_w, a_w) =\PhiStd\!\big(v_w-\delta a_w\big),
+\]
+where $\PhiStd$ is the standard normal CDF. General-election shocks are independent of primary shocks. Unlike the primary, the general election is an \emph{absolute} contest against the out-party opponent.
+
+\paragraph{Payoffs and equilibrium.}
+Candidates are office-motivated: the payoff equals the probability of winning the general election with office rents normalized to $1$. Conditional on $(\vprof, \aprof)$, candidate $i$'s interim expected payoff is therefore
+\[
+    u_i(\aprof\mid\vprof) = \Pr\big(\winner{\aprof} =i\mid \vprof, \aprof \big) \cdot \Pr(\GE\ win \mid v_i, a_i) = \frac{e^{v_i + a_i}}{\sum_{j=1}^N e^{v_j+a_j}}\cdot \PhiStd\!\big(v_i-\delta a_i\big).
+\]
+Because winning office require succeeding in both stages, the payoff factorizes into the product of nomination probability and conditional general-election win probability. The solution concept is a full-information pure-strategy Nash equilibrium, i.e., a profile of mappings $a_i(\cdot): \R^N\to\{0,1\}$ such that no candidate can profitable deviate at any realized type profile.
