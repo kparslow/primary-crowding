@@ -1,0 +1,56 @@
+\section{Model \& Notation}
+
+\subsection{Players, types, and information}
+There are $N \ge 2$ candidates indexed by $i\in\{1,\dots,N\}$. Candidate $i$ has valence
+\[
+    v_i \in \R,
+\]
+where $(v_1,\dots,v_N)$ are drawn i.i.d.\ from distribution $F$ with strictly positive density $f$ on $\R$.
+Let $\vprof = (v_1,\dots,v_N)$ denote the realized valence profile. The profile $\vprof$ is observed by all candidates before actions are chosen.
+
+\subsection{Actions}
+Each candidate chooses an action $a_i \in \{0,1\}$. Action $a_i=1$ improves candidate $i$'s standing in the party primary, but reduces their viability in the subsequent general election. Let $\aprof=(a_1,\dots,a_N)$.
+
+\subsection{Primary election (nomination stage)}
+Given $(\vprof,\aprof)$, candidate $i$'s primary index is
+\[
+    q_i^P = v_i + a_i + \varepsilon_i,
+\]
+where the shocks $\varepsilon_i$ are i.i.d.\ Type-I extreme value (EV1). The party nominee, denoted $w$, is the candidate with the highest primary index:
+\[
+    w = \arg\max_{j\in\{1,\dots,N\}} q_j^P.
+\]
+Integrating over $\varepsilon$ yields the (logit) nomination probability
+\[
+    \Pr(w = i \mid \vprof, \aprof) = \frac{\ex{v_i + a_i}}{\sum_{j=1}^N \ex{v_j + a_j}}.
+\]
+
+\subsection{General election (electability stage)}
+After the nominee is selected, candidate $w$ competes in the general election. The nominee's general-election index is
+\[
+    q_w^{GE} = v_w - \delta a_w + \eta_w,
+\]
+where $\eta_w \sim N(0,1)$ and $\delta>0$ measures the electability penalty from taking action $a=1$.
+Primary and general-election shocks are independent.
+
+Normalize the out-party opponent's general-election index to $0$. Then the probability that nominee $w$ wins the general election is
+\[
+    \Pr(\GE\ win \mid v_w, a_w) = \Pge{v_w}{\delta}{a_w} = \PhiStd\!\left(v_w - \delta a_w\right).
+\]
+
+\subsection{Payoffs}
+Candidates are office-motivated: winning office yields payoff $1$ and otherwise $0$. Since winning office requires winning both the primary and the general election, candidate $i$'s expected utility is
+\begin{align*}
+    u_i(\vprof,\aprof)
+    &= \Pr(w=i\mid\vprof,\aprof)\cdot \Pr(\GE\ win \mid v_i,a_i)\\
+    &= \frac{\ex{v_i + a_i}}{\sum_{j=1}^N \ex{v_j+a_j}}
+       \cdot \Pge{v_i}{\delta}{a_i}.
+\end{align*}
+
+\subsection{Timing}
+\begin{enumerate}
+    \item Nature draws the valence profile $\vprof=(v_1,\dots,v_N)$.
+    \item Candidates observe $\vprof$ and simultaneously choose actions $a_i\in\{0,1\}$.
+    \item Primary-election shocks $\varepsilon=(\varepsilon_1,\dots,\varepsilon_N)$ are realized and the nominee $w$ is selected.
+    \item General-election shock $\eta_w$ is realized; the nominee wins office with probability $\PhiStd(v_w-\delta a_w)$.
+\end{enumerate}
