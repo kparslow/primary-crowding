@@ -1,0 +1,82 @@
+\section{Properties of the proportional electability cost $\Cfun{v}{\delta}$}
+
+Fix $\delta>0$. Recall $\Cfun{v}{\delta}\equiv \PhiStd(v)/\PhiStd(v-\delta)$ (Definition~\ref{def:Cbasic}).
+
+The object $\Cfun{v}{\delta}$ isolates the \emph{general-election} penalty from taking action $a=1$:
+it is the proportional decrease in general-election win probability when the nominee's index shifts
+from $v$ to $v-\delta$. Its properties are useful for establishing monotonicity and for characterizing
+best responses via $\Gfun{v}{\Sagg}\ge \Cfun{v}{\delta}$.
+
+
+\begin{lemma}[Properties of the proportional electability cost]\label{lem:Cbasic}
+Fix $\delta > 0$. The proportional electability cost, given by
+\[
+    \Cfun{v}{\delta} = \frac{\PhiStd(v)}{\PhiStd(v-\delta)},
+\]
+satisfies the following properties:
+\begin{enumerate}
+    \item $\Cfun{v}{\delta} > 1$;
+    \item $\lim_{v\to+\infty}\Cfun{v}{\delta} = 1$ and $\lim_{v\to -\infty} \Cfun{v}{\delta} = +\infty$;
+    \item $\Cfun{v}{\delta}$ is strictly increasing in $\delta$ and strictly decreasing in $v$.
+\end{enumerate}
+\end{lemma}
+
+
+Part (ii) formalizes that electability costs are negligible for very high-valence candidates
+(both $\PhiStd(v)$ and $\PhiStd(v-\delta)$ are near $1$), but potentially very large for low-valence
+candidates (where $\PhiStd(v-\delta)$ can be extremely small). Part (iii) ensures the GE penalty from
+$a=1$ becomes more severe as $\delta$ increases and as $v$ falls.
+
+
+\begin{proof}
+Fix $\delta>0$.
+
+\begin{enumerate}
+    \item Since $v-\delta < v$ and $\PhiStd(\cdot)$ is strictly increasing, we have
+    $\PhiStd(v-\delta) < \PhiStd(v)$. Moreover $\PhiStd(v-\delta)>0$ for all finite $v$.
+    Hence
+    \[
+        \Cfun{v}{\delta}=\frac{\PhiStd(v)}{\PhiStd(v-\delta)} > 1.
+    \]
+
+    \item As $v\to +\infty$, $\PhiStd(v)\to 1$ and $\PhiStd(v-\delta)\to 1$, so
+    \[
+        \lim_{v\to +\infty}\Cfun{v}{\delta}= \frac{1}{1}=1.
+    \]
+    As $v\to -\infty$, $\PhiStd(v)\to 0$ and $\PhiStd(v-\delta)\to 0$. Consider
+    \[
+        \Cfun{v}{\delta}=\frac{\PhiStd(v)}{\PhiStd(v-\delta)}
+        =\frac{1/\PhiStd(v-\delta)}{1/\PhiStd(v)}.
+    \]
+    Using the standard normal left-tail asymptotic $\PhiStd(x)\sim \frac{\phiStd(x)}{-x}$ as
+    $x\to -\infty$, we obtain
+    \[
+        \frac{\PhiStd(v)}{\PhiStd(v-\delta)}
+        \sim
+        \frac{\phiStd(v)}{\phiStd(v-\delta)}\cdot \frac{-(v-\delta)}{-v}
+        =
+        \exp\!\left(\delta v-\frac{\delta^2}{2}\right)\cdot\left(1-\frac{\delta}{v}\right),
+        \qquad v\to -\infty,
+    \]
+    which diverges to $+\infty$ because $\delta v\to -\infty$ and the exponential term dominates.
+    Therefore $\lim_{v\to -\infty}\Cfun{v}{\delta}=+\infty$.
+
+    \item (Monotonicity in $\delta$.) For fixed $v$, the denominator $\PhiStd(v-\delta)$ is strictly
+    decreasing in $\delta$ (since $v-\delta$ falls as $\delta$ rises), while the numerator does not
+    depend on $\delta$. Since the denominator is positive, $\Cfun{v}{\delta}$ is strictly increasing
+    in $\delta$.
+
+    (Monotonicity in $v$.) Differentiate $\log \Cfun{v}{\delta}$ with respect to $v$:
+    \[
+        \frac{\partial}{\partial v}\log \Cfun{v}{\delta}
+        = \frac{\phiStd(v)}{\PhiStd(v)} - \frac{\phiStd(v-\delta)}{\PhiStd(v-\delta)}.
+    \]
+    The function $m(x)\equiv \frac{\phiStd(x)}{\PhiStd(x)}$ (the inverse Mills ratio) is strictly
+    decreasing in $x$, so $m(v) < m(v-\delta)$ for $\delta>0$. Hence
+    \[
+        \frac{\partial}{\partial v}\log \Cfun{v}{\delta} < 0,
+    \]
+    which implies $\frac{\partial}{\partial v}\Cfun{v}{\delta}<0$ and therefore $\Cfun{v}{\delta}$
+    is strictly decreasing in $v$.
+\end{enumerate}
+\end{proof}

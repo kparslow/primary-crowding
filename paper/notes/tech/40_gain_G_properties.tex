@@ -1,0 +1,119 @@
+\section{Properties of the proportional nomination gain $\Gfun{v}{\Sagg}$}
+
+Fix $\Sagg>0$. Recall $\Gfun{v}{\Sagg}\equiv \pOne{v}{\Sagg}/\pZero{v}{\Sagg}$ (Definition~\ref{def:Gbasic}).
+
+The object $\Gfun{v}{\Sagg}$ isolates the \emph{primary-stage} benefit of taking action $a=1$.
+Its properties are useful for (i) understanding how primary incentives vary with competitiveness,
+and (ii) simplifying computation via single-index representations.
+
+
+\subsection{Closed form and basic comparative statics}
+
+\begin{lemma}[Properties of proportional nomination gain]\label{lem:Gbasic}
+Fix $\Sagg > 0$. The proportional nomination gain from $a = 1$,
+\[
+    \Gfun{v}{\Sagg} = \frac{\pOne{v}{\Sagg}}{\pZero{v}{\Sagg}} = \frac{e^{v+1} + e\Sagg}{e^{v+1} + \Sagg},
+\]
+satisfies the following properties:
+\begin{enumerate}
+    \item $1 < \Gfun{v}{\Sagg} < e$;
+    \item $\Gfun{v}{\Sagg}$ is strictly increasing in $\Sagg$ and strictly decreasing in $v$;
+    \item $\Gfun{v}{\Sagg}$ depends on $(v, \Sagg)$ only through the index $v - \logg{\Sagg}$.
+\end{enumerate}
+\end{lemma}
+
+
+Part (iii) implies that, holding fixed the opponents' profile, the primary incentive can be summarized
+by a candidate's \emph{relative competitiveness} $v-\logg{\Sagg}$: higher $v$ reduces the marginal value
+of taking $a=1$, while higher opponent strength (higher $\Sagg$) increases it.
+
+
+\begin{proof}
+Fix $\Sagg > 0$. Using $\pOneRF{v}{\Sagg}=\frac{e^{v+1}}{e^{v+1}+\Sagg}$ and
+$\pZeroRF{v}{\Sagg}=\frac{e^{v}}{e^{v}+\Sagg}$, we have
+\[
+    \Gfun{v}{\Sagg}
+    =\frac{\pOne{v}{\Sagg}}{\pZero{v}{\Sagg}}
+    =\frac{e^{v+1}}{e^{v+1}+\Sagg}\cdot\frac{e^{v}+\Sagg}{e^{v}}
+    =\frac{e^{v+1}+e\Sagg}{e^{v+1}+\Sagg}.
+\]
+\begin{enumerate}
+    \item Since $\Sagg>0$ and $e^{v+1}>0$,
+    \[
+        \Gfun{v}{\Sagg}-1
+        =\frac{e^{v+1}+e\Sagg}{e^{v+1}+\Sagg}-1
+        =\frac{(e-1)\Sagg}{e^{v+1}+\Sagg}>0,
+    \]
+    so $\Gfun{v}{\Sagg}>1$. Moreover,
+    \[
+        e-\Gfun{v}{\Sagg}
+        =e-\frac{e^{v+1}+e\Sagg}{e^{v+1}+\Sagg}
+        =\frac{(e-1)e^{v+1}}{e^{v+1}+\Sagg}>0,
+    \]
+    so $\Gfun{v}{\Sagg}<e$.
+    \item Differentiate the closed form:
+    \[
+        \frac{\partial}{\partial \Sagg}\Gfun{v}{\Sagg}
+        =\frac{\partial}{\partial \Sagg}\left(\frac{e^{v+1}+e\Sagg}{e^{v+1}+\Sagg}\right)
+        =\frac{(e-1)e^{v+1}}{(e^{v+1}+\Sagg)^2}>0,
+    \]
+    and
+    \[
+        \frac{\partial}{\partial v}\Gfun{v}{\Sagg}
+        =\frac{\partial}{\partial v}\left(\frac{e^{v+1}+e\Sagg}{e^{v+1}+\Sagg}\right)
+        =\frac{(1-e)e^{v+1}\Sagg}{(e^{v+1}+\Sagg)^2}<0.
+    \]
+    \item Divide numerator and denominator by $e^v$:
+    \[
+        \Gfun{v}{\Sagg} = \frac{e(1+\Sagg e^{-v})}{e+\Sagg e^{-v}}.
+    \]
+    Let $x\equiv v-\logg{\Sagg}$, so that $\Sagg e^{-v}=e^{-x}$. Then
+    \[
+        \Gfun{v}{\Sagg}=\frac{e(1+e^{-x})}{e+e^{-x}} \equiv \widetilde G(x),
+    \]
+    which yields the single-index representation.
+\end{enumerate}
+\end{proof}
+
+\subsection{Derivative magnitude and competitiveness}
+
+\begin{lemma}[Properties of $\frac{\partial}{\partial v} \Gfun{v}{\Sagg}$]\label{lem:Gderiv}
+Fix $\Sagg > 0$. The derivative of $\Gfun{v}{\Sagg}$ with respect to $v$ satisfies:
+\begin{enumerate}
+    \item
+    \[
+        \frac{\partial}{\partial v}\Gfun{v}{\Sagg}
+        = \frac{e^{v+1}(1-e)\Sagg}{(e^{v+1}+\Sagg)^2};
+    \]
+    \item the magnitude $\left|\frac{\partial}{\partial v}\Gfun{v}{\Sagg}\right|$ depends on $(v,\Sagg)$ only through the ratio $\frac{e^{v+1}}{\Sagg}$ (equivalently $\frac{e^v}{\Sagg}$ up to a constant factor);
+    \item the magnitude $\left|\frac{\partial}{\partial v}\Gfun{v}{\Sagg}\right|$ is maximized when $e^{v+1} = \Sagg$.
+\end{enumerate}
+\end{lemma}
+
+
+This lemma is useful to argue that primary incentives change most rapidly for
+candidates who are neither clear frontrunners nor hopeless longshots, i.e.\ when $e^{v+1}$ and $\Sagg$
+are of similar magnitude.
+
+
+\begin{proof}
+\begin{enumerate}
+    \item This is the expression obtained in Lemma~\ref{lem:Gbasic}(ii).
+    \item Using the expression from (i),
+    \[
+        \left|\frac{\partial}{\partial v}\Gfun{v}{\Sagg}\right|
+        =(e-1)\frac{e^{v+1}\Sagg}{(e^{v+1}+\Sagg)^2}.
+    \]
+    Let $u\equiv \frac{e^{v+1}}{\Sagg}>0$. Then
+    \[
+        \left|\frac{\partial}{\partial v}\Gfun{v}{\Sagg}\right|
+        =(e-1)\frac{u}{(u+1)^2},
+    \]
+    which depends on $(v,\Sagg)$ only through $u$.
+    \item Consider $h(u)=\frac{u}{(u+1)^2}$ for $u>0$. Its derivative is
+    \[
+        h'(u)=\frac{1-u}{(u+1)^3},
+    \]
+    so $h$ is maximized at $u=1$, i.e.\ when $e^{v+1}=\Sagg$.
+\end{enumerate}
+\end{proof}
