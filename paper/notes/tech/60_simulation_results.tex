@@ -22,14 +22,14 @@ tables that can be inspected, plotted, or used as inputs to additional analysis.
 
 All simulation code is implemented in R and is organized into:
 \begin{itemize}
-    \item {Core model functions in \texttt{computational/R/functions/model.R}. These define
+    \item \textbf{Core model functions} in \texttt{computational/R/functions/model.R}. These define
     the payoff objects $u_0(\cdot)$ and $u_1(\cdot)$ and the incentive difference
     $\Delta(\cdot)$ (exposed as \texttt{Delta\_incentive()} in code), which is the key object used
     to construct best responses.
-    \item Grid construction helpers in \texttt{computational/R/functions/grids.R}. These
+    \item \textbf{Grid construction helpers} in \texttt{computational/R/functions/grids.R}. These
     provide convenience functions to create evaluation grids over $v$ and over the parameter pair
     $(\log S,\delta)$.
-    \item Manifest / reproducibility helpers in \texttt{computational/R/functions/manifest.R}.
+    \item \textbf{Manifest / reproducibility helpers} in \texttt{computational/R/functions/manifest.R}.
     The main grid runner writes a small JSON manifest recording the script path, parameter settings,
     and hashes/sizes of generated outputs.
 \end{itemize}
@@ -91,7 +91,7 @@ robustness checks to small numerical tolerances, optionally recomputes $\Delta(v
 selected cells, and writes a compact diagnostics table plus simple plots under
 \texttt{computational/output/diagnostics/}.
 
-\subsection{Interpretting Output \& Results}\label{subsec:sim_interpret}
+\subsection{Interpreting Output \& Results}\label{subsec:sim_interpret}
 
 The simulation outputs are most useful as a diagnostic for the shape of incentives and best
 responses across $(\log S,\delta)$, and for understanding when the analytical cutoff logic provides
@@ -130,7 +130,7 @@ Interpreting these objects:
 \end{itemize}
 
 Cells with multiple switches are those where the gain--cost tradeoff is nontrivial in $v$.
-the primary-stage gain from shifting $v$ by $+1$ is inherently nonlinear because $p(v;S)$ is logistic,
+The primary-stage gain from shifting $v$ by $+1$ is inherently nonlinear because $p(v;S)$ is logistic,
 and the general-election term $\Phi(v-\delta)$ is also nonlinear in $v$ (especially in the tails).
 
 Practically, this should shape how the analytical results are used:
@@ -153,9 +153,7 @@ a bridge between the analytical conditions and quantitative magnitudes.
 
 \subsection{Simulation results}\label{subsec:sim_results}
 
-This subsection summarizes what the numerical evaluation implies on the parameter grid explored in
-\texttt{computational/R/runners/01\_single\_agent\_grid.R}. The reported statistics are computed from the
-derived per-cell summary \texttt{cutoffs\_and\_action\_rates.csv} and from the additional results tables/figures
+The reported statistics are computed from the derived per-cell summary \texttt{cutoffs\_and\_action\_rates.csv} and from the additional results tables/figures
 produced by \texttt{computational/R/analysis/results\_cutoffs\_action\_rates.R}.
 
 \paragraph{Best-response shape in $v$: cutoff behavior dominates.}
@@ -268,4 +266,4 @@ Running \texttt{computational/R/analysis/results\_cutoffs\_action\_rates.R} prod
 \begin{itemize}
     \item \texttt{computational/output/manifests/*.json}: manifests recording run parameters and hashes/sizes of
     generated outputs.
-\end{itemize}d{itemize}
+\end{itemize}
