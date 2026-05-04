@@ -1,0 +1,41 @@
+name: Build LaTeX PDF
+
+"on":
+  workflow_dispatch:
+    inputs:
+      root_file:
+        description: Path to the main .tex file to compile (relative to repo root)
+        required: true
+        default: paper/notes/tech/tech_building_blocks.tex
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  build-latex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compile LaTeX (PDF)
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: ${{ inputs.root_file }}
+          compiler: latexmk
+          args: -pdf -halt-on-error -file-line-error
+
+      - name: Compute PDF basename (repo-root output)
+        shell: bash
+        run: |
+          tex="${{ inputs.root_file }}"
+          base="$(basename "${tex%.tex}")"
+          echo "PDF_PATH=${base}.pdf" >> "$GITHUB_ENV"
+          echo "Will upload: ${base}.pdf"
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: latex-pdf
+          path: ${{ env.PDF_PATH }}
+          if-no-files-found: error
