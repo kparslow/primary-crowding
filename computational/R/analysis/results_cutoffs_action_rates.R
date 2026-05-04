@@ -23,8 +23,13 @@ read_any <- function(path) {
 to_logical <- function(x) {
   if (is.logical(x)) return(x)
   if (is.numeric(x)) return(x != 0)
-  if (is.character(x)) return(toupper(x) %in% c("TRUE","T","1"))
+  if (is.character(x)) return(toupper(x) %in% c("TRUE", "T", "1"))
   as.logical(x)
+}
+
+quantile_table <- function(x, probs = c(0, .01, .05, .1, .25, .5, .75, .9, .95, .99, 1)) {
+  q <- stats::quantile(x, probs = probs, na.rm = TRUE)
+  data.frame(stat = names(q), value = as.numeric(q), row.names = NULL)
 }
 
 # ---- Paths ----
@@ -41,8 +46,11 @@ dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
 df <- read_any(infile)
 if (have_dt) data.table::setDT(df)
 
-required <- c("logS","delta","sigma","v_star","action_rate","action_rate_cutoff",
-              "n_switches_a_star","switches_ok","always0","always1")
+required <- c(
+  "logS", "delta", "sigma", "v_star",
+  "action_rate", "action_rate_cutoff",
+  "n_switches_a_star", "switches_ok", "always0", "always1"
+)
 miss <- setdiff(required, names(df))
 if (length(miss) > 0) stop("Input missing required columns: ", paste(miss, collapse = ", "))
 
@@ -56,29 +64,42 @@ df[, regime := "cutoff_ok"]
 df[always0 == TRUE, regime := "always0"]
 df[always1 == TRUE, regime := "always1"]
 df[switches_ok == FALSE, regime := "nonmonotone"]
-df[, regime := factor(regime, levels = c("always0","always1","cutoff_ok","nonmonotone"))]
-
-# ---- Helper: quantile table ----
-quantile_table <- function(x, probs = c(0, .01, .05, .1, .25, .5, .75, .9, .95, .99, 1)) {
-  q <- stats::quantile(x, probs = probs, na.rm = TRUE)
-  data.frame(stat = names(q), value = as.numeric(q), row.names = NULL)
-}
+df[, regime := factor(regime, levels = c("always0", "always1", "cutoff_ok", "nonmonotone"))]
 
 # -------------------------
 # TABLES
 # -------------------------
-
 N <- nrow(df)
+
+# 0) Grid info / caveat
+# Regime shares (especially always0/always1) are sensitive to the chosen parameter grid.
+# Extending delta_max mechanically increases the number of always0 observations, etc.
+grid_info <- data.frame(
+  n_cells = N,
+  logS_min = min(df$logS, na.rm = TRUE),
+  logS_max = max(df$logS, na.rm = TRUE),
+  delta_min = min(df$delta, na.rm = TRUE),
+  delta_max = max(df$delta, na.rm = TRUE),
+  logS_step = {
+    s <- sort(unique(df$logS))
+    if (length(s) >= 2) s[2] - s[1] else NA_real_
+  },
+  delta_step = {
+    d <- sort(unique(df$delta))
+    if (length(d) >= 2) d[2] - d[1] else NA_real_
+  }
+)
+utils::write.csv(grid_info, file.path(tab_dir, "grid_info.csv"), row.names = FALSE)
 
 # 1) Regime counts
 reg_counts <- as.data.frame(table(df$regime), stringsAsFactors = FALSE)
-names(reg_counts) <- c("regime","count")
+names(reg_counts) <- c("regime", "count")
 reg_counts$share <- reg_counts$count / N
 utils::write.csv(reg_counts, file.path(tab_dir, "regime_counts.csv"), row.names = FALSE)
 
 # 2) Switch-count distribution
 switch_counts <- as.data.frame(table(df$n_switches_a_star), stringsAsFactors = FALSE)
-names(switch_counts) <- c("n_switches_a_star","count")
+names(switch_counts) <- c("n_switches_a_star", "count")
 switch_counts$share <- switch_counts$count / N
 utils::write.csv(switch_counts, file.path(tab_dir, "switch_count_distribution.csv"), row.names = FALSE)
 
@@ -125,7 +146,7 @@ err_by_regime <- do.call(rbind, lapply(levels(df$regime), function(r) {
 }))
 utils::write.csv(err_by_regime, file.path(tab_dir, "cutoff_approx_error_by_regime.csv"), row.names = FALSE)
 
-# 6) Empirical frontiers by logS (optional but very useful for notes)
+# 6) Empirical frontiers by logS (useful for notes)
 frontiers <- do.call(rbind, lapply(sort(unique(df$logS)), function(ls) {
   sub <- df[df$logS == ls, ]
   sub <- sub[order(sub$delta), ]
@@ -141,6 +162,60 @@ frontiers <- do.call(rbind, lapply(sort(unique(df$logS)), function(ls) {
   )
 }))
 utils::write.csv(frontiers, file.path(tab_dir, "frontiers_by_logS.csv"), row.names = FALSE)
+
+# 7) Nonmonotone cell summary
+nonmono <- df[df$switches_ok == FALSE, ]
+
+nonmono_summary <- data.frame(
+  n_nonmonotone = nrow(nonmono),
+  share_nonmonotone = nrow(nonmono) / N,
+  logS_min = if (nrow(nonmono)) min(nonmono$logS) else NA_real_,
+  logS_max = if (nrow(nonmono)) max(nonmono$logS) else NA_real_,
+  delta_min = if (nrow(nonmono)) min(nonmono$delta) else NA_real_,
+  delta_max = if (nrow(nonmono)) max(nonmono$delta) else NA_real_,
+  n_switches_min = if (nrow(nonmono)) min(nonmono$n_switches_a_star) else NA_real_,
+  n_switches_max = if (nrow(nonmono)) max(nonmono$n_switches_a_star) else NA_real_,
+  action_rate_min = if (nrow(nonmono)) min(nonmono$action_rate) else NA_real_,
+  action_rate_median = if (nrow(nonmono)) stats::median(nonmono$action_rate) else NA_real_,
+  action_rate_max = if (nrow(nonmono)) max(nonmono$action_rate) else NA_real_,
+  n_inf_v_star = if (nrow(nonmono)) sum(is.infinite(nonmono$v_star)) else NA_real_,
+  share_inf_v_star = if (nrow(nonmono)) mean(is.infinite(nonmono$v_star)) else NA_real_,
+  v_star_min_finite = {
+    if (!nrow(nonmono)) NA_real_ else {
+      vv <- nonmono$v_star[is.finite(nonmono$v_star)]
+      if (length(vv)) min(vv) else NA_real_
+    }
+  },
+  v_star_median_finite = {
+    if (!nrow(nonmono)) NA_real_ else {
+      vv <- nonmono$v_star[is.finite(nonmono$v_star)]
+      if (length(vv)) stats::median(vv) else NA_real_
+    }
+  },
+  v_star_max_finite = {
+    if (!nrow(nonmono)) NA_real_ else {
+      vv <- nonmono$v_star[is.finite(nonmono$v_star)]
+      if (length(vv)) max(vv) else NA_real_
+    }
+  }
+)
+utils::write.csv(nonmono_summary,
+                 file.path(tab_dir, "nonmonotone_cells_summary.csv"),
+                 row.names = FALSE)
+
+# Full list of nonmonotone cells (for selecting examples / plotting)
+if (nrow(nonmono) > 0) {
+  nonmono_list <- nonmono[, c(
+    "logS", "delta", "sigma",
+    "n_switches_a_star",
+    "v_star", "action_rate",
+    "always0", "always1"
+  )]
+  nonmono_list <- nonmono_list[order(nonmono_list$logS, nonmono_list$delta), ]
+  utils::write.csv(nonmono_list,
+                   file.path(tab_dir, "nonmonotone_cells_list.csv"),
+                   row.names = FALSE)
+}
 
 # -------------------------
 # FIGURES
@@ -159,8 +234,10 @@ p_ar <- ggplot(df, aes(x = logS, y = delta, fill = action_rate)) +
   ) +
   theme_minimal(base_size = 12)
 
-ggplot2::ggsave(file.path(fig_dir, "heatmap_action_rate.png"),
-                p_ar, width = 8.5, height = 6.5, dpi = 200)
+ggplot2::ggsave(
+  file.path(fig_dir, "heatmap_action_rate.png"),
+  p_ar, width = 8.5, height = 6.5, dpi = 200
+)
 
 # Heatmap: v_star (Inf as NA/grey); cap extreme values for readability
 df[, v_star_plot := v_star]
@@ -180,8 +257,10 @@ p_vs <- ggplot(df, aes(x = logS, y = delta, fill = v_star_cap)) +
   ) +
   theme_minimal(base_size = 12)
 
-ggplot2::ggsave(file.path(fig_dir, "heatmap_v_star.png"),
-                p_vs, width = 8.5, height = 6.5, dpi = 200)
+ggplot2::ggsave(
+  file.path(fig_dir, "heatmap_v_star.png"),
+  p_vs, width = 8.5, height = 6.5, dpi = 200
+)
 
 # Regime map
 p_reg <- ggplot(df, aes(x = logS, y = delta, fill = regime)) +
@@ -200,18 +279,28 @@ p_reg <- ggplot(df, aes(x = logS, y = delta, fill = regime)) +
   ) +
   theme_minimal(base_size = 12)
 
-ggplot2::ggsave(file.path(fig_dir, "regime_map.png"),
-                p_reg, width = 8.5, height = 6.5, dpi = 200)
+ggplot2::ggsave(
+  file.path(fig_dir, "regime_map.png"),
+  p_reg, width = 8.5, height = 6.5, dpi = 200
+)
 
 # ---- Console report ----
 cat("\nDone.\n")
-cat("Read:   ", infile, "\n", sep = "")
+cat("Read: ", infile, "\n", sep = "")
 cat("Wrote tables to: ", tab_dir, "\n", sep = "")
-cat("Wrote figures to:", fig_dir, "\n\n", sep = "")
-cat("Regime counts:\n")
+cat("Wrote figures to: ", fig_dir, "\n\n", sep = "")
+
+cat("Grid info (caveat: regime shares depend on grid bounds; see grid_info.csv):\n")
+print(grid_info)
+
+cat("\nRegime counts:\n")
 print(reg_counts)
+
+cat("\nNonmonotone summary:\n")
+print(nonmono_summary)
+
 cat("\nCutoff approx error summary:\n")
 print(err_summary)
+
 cat("\nFrontiers by logS (head):\n")
 print(utils::head(frontiers))
-
