@@ -49,10 +49,11 @@ test_that("grid_v raises error for n < 2", {
 })
 
 test_that("grid_v default uses 4*sigma-based range and 1201 points", {
+  # sigma is defined as 1 in grids.R; use the literal value here to be explicit.
   g <- grid_v()
   expect_length(g, 1201)
-  expect_equal(min(g), -4 * sigma)
-  expect_equal(max(g),  4 * sigma)
+  expect_equal(min(g), -4)
+  expect_equal(max(g),  4)
 })
 
 # ---------------------------------------------------------------------------
