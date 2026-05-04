@@ -51,8 +51,7 @@ rsconnect/
 # Build
 paper/notes/tech/build/
 
-# Generated simulation output (do not commit)
-computational/output/
+
 
 # Generated simulation output (do not commit)
-computational/output/
+computational/output/datasets/single_agent_grid.csv

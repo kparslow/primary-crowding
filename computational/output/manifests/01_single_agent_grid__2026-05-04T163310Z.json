@@ -1,0 +1,36 @@
+{
+  "run_id": "01_single_agent_grid__2026-05-04T163310Z",
+  "created_utc": "2026-05-04 16:33:11 UTC",
+  "git": {
+    "commit": "90ab13e622ace2e4f48a306dd4c36e2bdcbb3448",
+    "repo_dirty": true
+  },
+  "script": "computational/R/runners/01_single_agent_grid.R",
+  "parameters": {
+    "sigma": 1,
+    "v_min": -4,
+    "v_max": 4,
+    "n_v": 1201,
+    "logS_min": -4,
+    "logS_max": 4,
+    "n_logS": 41,
+    "delta_min": 0.1,
+    "delta_max": 2.5,
+    "n_delta": 41,
+    "a_star_rule": "1{Delta >= 0}"
+  },
+  "outputs": [
+    {
+      "path": "computational/output/datasets/single_agent_grid.csv",
+      "bytes": 206510537,
+      "sha256": "78e010439d43f217cbe5dbc7063507e925f86b8722636f1bc348208228873819"
+    }
+  ],
+  "environment": {
+    "R_version": "4.5.2",
+    "platform": "aarch64-apple-darwin20",
+    "packages": {
+      "digest": "0.6.37"
+    }
+  }
+}
