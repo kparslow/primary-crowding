@@ -33,9 +33,10 @@ jobs:
           echo "Will upload: $pdf"
 
       - name: Debug: list PDFs
+        shell: bash
         run: |
           echo "Listing PDFs under repo..."
-          find . -maxdepth 6 -type f -name "*.pdf" -print
+          find . -maxdepth 6 -type f -name "*.pdf" -print || true
           echo "Listing paper/notes/tech..."
           ls -R paper/notes/tech || true
 
