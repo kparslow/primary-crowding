@@ -21,20 +21,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Compile LaTeX
+      - name: Compile LaTeX (PDF)
         uses: xu-cheng/latex-action@v3
         with:
           root_file: ${{ inputs.root_file }}
-          args: -halt-on-error -file-line-error
+          compiler: latexmk
+          args: -pdf -halt-on-error -file-line-error
 
       - name: Compute PDF path
         shell: bash
         run: |
           pdf="${ROOT_FILE%.tex}.pdf"
           echo "PDF_PATH=$pdf" >> "$GITHUB_ENV"
+          echo "Will upload: $pdf"
 
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v4
         with:
           name: latex-pdf
           path: ${{ env.PDF_PATH }}
+          if-no-files-found: error
