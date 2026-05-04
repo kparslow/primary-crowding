@@ -1,8 +1,12 @@
+name: Build LaTeX PDF
+
 on:
-  push:
-    paths:
-      - "paper/notes/tech/**"
   workflow_dispatch:
+    inputs:
+      root_file:
+        description: "Path to the main .tex file to compile (relative to repo root)"
+        required: true
+        default: "paper/notes/tech/tech_building_blocks.tex"
 
 jobs:
   build-latex:
@@ -14,10 +18,10 @@ jobs:
       - name: Compile LaTeX
         uses: xu-cheng/latex-action@v3
         with:
-          root_file: paper/notes/tech/tech_building_blocks.tex
+          root_file: ${{ inputs.root_file }}
 
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tech_building_blocks-pdf
-          path: paper/notes/tech/tech_building_blocks.pdf
+          name: latex-pdf
+          path: ${{ github.workspace }}/${{ inputs.root_file }}.pdf
