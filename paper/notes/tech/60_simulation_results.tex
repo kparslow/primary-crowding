@@ -43,7 +43,7 @@ interval and (ii) a rectangular grid over $(\log S,\delta)$. For each $(\log S,\
 $\Delta(v;S,\delta)$ over the $v$ grid and stores the implied best response $a^\star(v;S,\delta)$ using a fixed
 tie-break convention. Output: \texttt{computational/output/datasets/single\_agent\_grid.csv}.
 
-\paragraph{Step 2: compress to cutoffs and action rates.}
+\paragraph{Step 2: compress to cutoffs and action rates.} \\
 The runner \texttt{computational/R/runners/02\_cutoffs\_and\_action\_rates.R} summarizes each $(\log S,\delta)$ cell
 with:
 \begin{itemize}
@@ -55,7 +55,7 @@ with:
 The script also counts the number of switches in $a^\star(v)$ along the ordered $v$ grid to diagnose whether the best
 response is consistent with a single cutoff. Output: \texttt{computational/output/derived/cutoffs\_and\_action\_rates.csv}.
 
-\paragraph{Step 3: targeted diagnostics for non-monotone cells.}
+\paragraph{Step 3: targeted diagnostics for non-monotone cells.}\\
 The analysis script \texttt{computational/R/analysis/03\_diagnose\_nonmonotone\_cells.R} focuses on cells where
 $a^\star(v)$ switches two or more times. It checks robustness to small numerical tolerances and can recompute
 $\Delta(v)$ on a denser $v$ grid for selected cells. Outputs are written under \texttt{computational/output/diagnostics/}.
