@@ -1,0 +1,2 @@
+"n_nonmonotone","share_nonmonotone","logS_min","logS_max","delta_min","delta_max","n_switches_min","n_switches_max","action_rate_min","action_rate_median","action_rate_max","n_inf_v_star","share_inf_v_star","v_star_min_finite","v_star_median_finite","v_star_max_finite"
+19,0.0113027959547888,-3.6,-1,0.1,0.22,2,3,0.00329010917479463,0.0550981904649484,0.663704952792006,0,0,-4,-4,-3.06666666666667
