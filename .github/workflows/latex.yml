@@ -14,9 +14,6 @@ env:
 jobs:
   build-latex:
     runs-on: ubuntu-latest
-    env:
-      ROOT_FILE: ${{ inputs.root_file }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,16 +22,16 @@ jobs:
         uses: xu-cheng/latex-action@v3
         with:
           root_file: ${{ inputs.root_file }}
-          work_in_root_file_dir: true
           compiler: latexmk
           args: -pdf -halt-on-error -file-line-error
 
-      - name: Compute PDF path
+      - name: Compute PDF basename (repo-root output)
         shell: bash
         run: |
-          pdf="${ROOT_FILE%.tex}.pdf"
-          echo "PDF_PATH=$pdf" >> "$GITHUB_ENV"
-          echo "Will upload: $pdf"
+          tex="${{ inputs.root_file }}"
+          base="$(basename "${tex%.tex}")"
+          echo "PDF_PATH=${base}.pdf" >> "$GITHUB_ENV"
+          echo "Will upload: ${base}.pdf"
 
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v4
