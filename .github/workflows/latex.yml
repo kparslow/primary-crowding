@@ -25,6 +25,7 @@ jobs:
         uses: xu-cheng/latex-action@v3
         with:
           root_file: ${{ inputs.root_file }}
+          work_in_root_file_dir: true
           compiler: latexmk
           args: -pdf -halt-on-error -file-line-error
 
