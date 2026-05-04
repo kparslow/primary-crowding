@@ -105,7 +105,7 @@ The simulation pipeline produces the following:
     for generated outputs (useful for reproducibility).
 \end{itemize}
 
-\subsection{Simulation results}\label{subsec:sim_interpret}
+\subsection{Interpretting Output \& Results}\label{subsec:sim_interpret}
 
 The simulation outputs are most useful as a diagnostic for the shape of incentives and best
 responses across $(\log S,\delta)$, and for understanding when the analytical cutoff logic provides
@@ -164,3 +164,123 @@ of choosing $a=1$ in a population of candidates with heterogeneous $v$. This obj
 Accordingly, the action-rate surface over $(\log S,\delta)$ is a natural summary of how the model's
 behavior changes with opponent strength and the severity of the general-election penalty, and it provides
 a bridge between the analytical conditions and quantitative magnitudes.
+
+\subsection{Simulation results}\label{subsec:sim_results}
+
+This subsection summarizes what the numerical evaluation implies on the parameter grid explored in
+\texttt{computational/R/runners/01\_single\_agent\_grid.R}. The reported statistics are computed from the
+derived per-cell summary \texttt{cutoffs\_and\_action\_rates.csv} and from the additional results tables/figures
+produced by \texttt{computational/R/analysis/results\_cutoffs\_action\_rates.R}.
+
+\paragraph{Best-response shape in $v$: cutoff behavior dominates.}
+Across the $(\log S,\delta)$ grid (1681 cells), the best response $a^\star(v;S,\delta)$ is typically either
+constant in $v$ or a single-switch cutoff:
+\begin{itemize}
+    \item 34.0\% of cells are \texttt{always0} (i.e., $a^\star\equiv 0$ on the $v$-grid);
+    \item 4.76\% of cells are \texttt{always1} (i.e., $a^\star\equiv 1$ on the $v$-grid);
+    \item 60.1\% of cells exhibit exactly one switch in $a^\star(v)$ (a clean cutoff);
+    \item multi-switch (nonmonotone) behavior is rare, occurring in 19 cells (1.13\%).
+\end{itemize}
+The spatial pattern of these regimes over $(\log S,\delta)$ is shown by the regime map in
+Figure~\ref{fig:sim_regime_map}.
+
+\paragraph{Implied action rates are polarized.}
+Aggregating over candidate types $v\sim\mathcal{N}(0,\sigma^2)$, the implied action rate
+$\Pr(a^\star=1\mid \log S,\delta)$ is highly dispersed and often close to a corner:
+the median action rate across cells is $9.0\times 10^{-4}$, while the 75th percentile is 0.101,
+the 90th percentile is 0.875, and the 95th percentile is 0.999. The surface of implied action rates
+over $(\log S,\delta)$ is summarized by Figure~\ref{fig:sim_action_rate_heatmap}.
+
+\paragraph{Cutoff approximation is numerically accurate when single-crossing holds.}
+In cells where a cutoff characterization applies and the script reports a cutoff-implied rate
+(\texttt{action\_rate\_cutoff} is non-missing; 1662 cells), the cutoff-implied and numerically integrated action
+rates are extremely close: the median absolute difference is $2.69\times 10^{-5}$, the 90th percentile is
+$8.93\times 10^{-4}$, and the maximum is $1.30\times 10^{-3}$. This supports using the cutoff summary
+$v^\star(\log S,\delta)$ (together with the normal CDF) as a reliable quantitative approximation in the region
+where $a^\star(v)$ is single-crossing. The implied cutoff surface (with $v^\star=+\infty$ masked) is shown in
+Figure~\ref{fig:sim_vstar_heatmap}.
+
+\paragraph{Frontiers in $(\log S,\delta)$.}
+A useful summary of parameter dependence is via empirical ``frontiers'': for each $\log S$, the script records
+the smallest $\delta$ at which the model is \texttt{always0} and the largest $\delta$ at which it is \texttt{always1}
+(see \texttt{frontiers\_by\_logS.csv}). The \texttt{always0} frontier $\delta_{\text{always0}}(\log S)$ rises with
+$\log S$ over the explored range (e.g., from 0.52 at $\log S=-4$ to 1.78 at $\log S=0$ and 2.50 at $\log S=1.8$),
+consistent with the interpretation that when the opponent is stronger (higher $S$), the nomination gain from action
+$a=1$ can justify a larger general-election penalty $\delta$.
+
+\paragraph{Caveat: regime shares depend on the chosen grid.}
+The reported fractions of \texttt{always0} and \texttt{always1} cells are properties of the \emph{finite grid}
+of $(\log S,\delta)$ values explored (in particular the maximum $\delta$). Extending the grid to higher $\delta$
+mechanically increases the number of cells classified as \texttt{always0}. For this reason, the frontier objects
+(e.g.\ $\delta_{\text{always0}}(\log S)$) and the action-rate surface (Figure~\ref{fig:sim_action_rate_heatmap})
+are more informative than raw regime shares.
+
+% --- Figures (uncomment once \usepackage{graphicx} is available in the preamble) ---
+% \begin{figure}[t]
+%     \centering
+%     \includegraphics[width=0.85\textwidth]{computational/output/results/figures/heatmap_action_rate.png}
+%     \caption{Implied action rate $\Pr(a^\star=1\mid \log S,\delta)$ over the simulation grid.}
+%     \label{fig:sim_action_rate_heatmap}
+% \end{figure}
+%
+% \begin{figure}[t]
+%     \centering
+%     \includegraphics[width=0.85\textwidth]{computational/output/results/figures/heatmap_v_star.png}
+%     \caption{Cutoff surface $v^\star(\log S,\delta)$ (capped for readability; cells with $v^\star=+\infty$ are masked).}
+%     \label{fig:sim_vstar_heatmap}
+% \end{figure}
+%
+% \begin{figure}[t]
+%     \centering
+%     \includegraphics[width=0.85\textwidth]{computational/output/results/figures/regime_map.png}
+%     \caption{Regime map over $(\log S,\delta)$: always-$0$, always-$1$, single-switch cutoff, and nonmonotone cells.}
+%     \label{fig:sim_regime_map}
+% \end{figure}
+
+\subsection{Outputs and file locations}\label{subsec:sim_outputs}
+
+The simulation pipeline produces (at least) the following artifacts.
+
+\paragraph{Raw grid output (large, local).}
+\begin{itemize}
+    \item \texttt{computational/output/datasets/single\_agent\_grid.csv}: raw grid evaluations of
+    $(u_0,u_1,\Delta,a^\star)$ over $(v,\log S,\delta)$. This file can be very large and is primarily used for
+    targeted mechanism plots (e.g.\ $\Delta(v)$ and $a^\star(v)$ in selected cells) and for debugging.
+\end{itemize}
+
+\paragraph{Derived per-cell summaries (small).}
+\begin{itemize}
+    \item \texttt{computational/output/derived/cutoffs\_and\_action\_rates.csv}: compressed per-cell summary indexed
+    by $(\log S,\delta)$ including $v^\star$, implied action rates, and monotonicity diagnostics.
+\end{itemize}
+
+\paragraph{Results tables and figures for these notes.}
+Running \texttt{computational/R/analysis/results\_cutoffs\_action\_rates.R} produces:
+\begin{itemize}
+    \item Tables under \texttt{computational/output/results/tables/}, including:
+    \texttt{grid\_info.csv} (grid bounds for interpretation),
+    \texttt{regime\_counts.csv},
+    \texttt{switch\_count\_distribution.csv},
+    \texttt{action\_rate\_quantiles.csv},
+    \texttt{v\_star\_summary.csv},
+    \texttt{cutoff\_approx\_error\_summary.csv},
+    \texttt{cutoff\_approx\_error\_by\_regime.csv}, and
+    \texttt{frontiers\_by\_logS.csv}.
+    \item Figures under \texttt{computational/output/results/figures/}:
+    \texttt{heatmap\_action\_rate.png} (Figure~\ref{fig:sim_action_rate_heatmap}),
+    \texttt{heatmap\_v\_star.png} (Figure~\ref{fig:sim_vstar_heatmap}), and
+    \texttt{regime\_map.png} (Figure~\ref{fig:sim_regime_map}).
+\end{itemize}
+
+\paragraph{Diagnostics for non-monotone cells (optional).}
+\begin{itemize}
+    \item \texttt{computational/output/diagnostics/nonmonotone\_cells\_diagnostics.csv} and
+    \texttt{computational/output/diagnostics/figures/}: targeted diagnostics for cells in which $a^\star(v)$ switches
+    multiple times.
+\end{itemize}
+
+\paragraph{Manifests (reproducibility).}
+\begin{itemize}
+    \item \texttt{computational/output/manifests/*.json}: manifests recording run parameters and hashes/sizes of
+    generated outputs.
+\end{itemize}
