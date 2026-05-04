@@ -1,6 +1,6 @@
 name: Build LaTeX PDF
 
-on:
+"on":
   workflow_dispatch:
     inputs:
       root_file:
