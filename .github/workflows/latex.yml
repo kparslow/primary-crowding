@@ -1,0 +1,23 @@
+on:
+  push:
+    paths:
+      - "paper/notes/tech/**"
+  workflow_dispatch:
+
+jobs:
+  build-latex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compile LaTeX
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: paper/notes/tech/tech_building_blocks.tex
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tech_building_blocks-pdf
+          path: paper/notes/tech/tech_building_blocks.pdf
