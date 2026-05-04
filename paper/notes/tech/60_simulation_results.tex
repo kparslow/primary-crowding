@@ -1,0 +1,166 @@
+\section{Simulation notes: grid evaluation, cutoffs, and action rates}\label{sec:sim_notes}
+
+\subsection{Purpose and role of the simulation}\label{subsec:sim_purpose}
+
+The analytical results in these notes characterize best responses in terms of model primitives and
+comparisons of the form
+\[
+    \Delta(v;S,\delta) \equiv u_1(v;S,\delta) - u_0(v;S)
+    \quad\text{and}\quad
+    a^\star(v;S,\delta)=\mathbf{1}\{\Delta(v;S,\delta)\ge 0\}.
+\]
+The work in the \texttt{computational/} folder plays a supporting role by numerically evaluating these objects on a dense grid of parameter values in order to (i) visualize
+comparative statics, (ii) compute summary objects such as cutoffs and implied action rates, and
+(iii) diagnose whether the best response behaves like a single-crossing cutoff in $v$ for each
+$(S,\delta)$ cell.
+
+The scripts generate \emph{model-implied} outcomes
+from the primitives and the best-response rule, and then aggregate those outcomes into compact
+tables that can be inspected, plotted, or used as inputs to additional analysis.
+
+\subsection{How the model is simulated (core model \& helpers)}\label{subsec:sim_how}
+
+All simulation code is implemented in R and is organized into:
+\begin{itemize}
+    \item {Core model functions in \texttt{computational/R/functions/model.R}. These define
+    the payoff objects $u_0(\cdot)$ and $u_1(\cdot)$ and the incentive difference
+    $\Delta(\cdot)$ (exposed as \texttt{Delta\_incentive()} in code), which is the key object used
+    to construct best responses.
+    \item Grid construction helpers in \texttt{computational/R/functions/grids.R}. These
+    provide convenience functions to create evaluation grids over $v$ and over the parameter pair
+    $(\log S,\delta)$.
+    \item Manifest / reproducibility helpers in \texttt{computational/R/functions/manifest.R}.
+    The main grid runner writes a small JSON manifest recording the script path, parameter settings,
+    and hashes/sizes of generated outputs.
+\end{itemize}
+
+Fix $\sigma>0$ and interpret candidate valence as distributed
+\[
+    v \sim \mathcal{N}(0,\sigma^2).
+\]
+For aggregation and summary statistics, I treat candidate valence as a random draw
+$v\sim\mathcal{N}(0,\sigma^2)$ for primarily computational reasons. The model objects can
+be evaluated for very large $|v|$, but on a finite grid the extreme tails are both (i) empirically
+less relevant and (ii) a source of numerical instability when computing ratios and
+differences of probabilities. Using a normal reference distribution focuses attention on the
+region of $v$ where most mass lies and yields stable numerical integrals for implied action rates.
+
+I keep $\sigma$ explicit as a scale parameter for valence. Numerical grids and penalty magnitudes
+are chosen in multiples of $\sigma$ (e.g.\ $v\in[-4\sigma,4\sigma]$), which makes the computations
+comparable across alternative calibrations of the dispersion of $v$.
+
+I grid over $\log S$ rather than $S$ directly. This ensures $S>0$ by construction and provides a
+numerically well-behaved grid that samples $S$ multiplicatively (i.e.\ in equal log steps) across
+orders of magnitude.
+
+\paragraph{Step 1: evaluate incentives and best responses on a grid.}
+The runner \texttt{computational/R/runners/01\_single\_agent\_grid.R} constructs:
+\begin{enumerate}
+    \item a dense grid for $v$ over a bounded interval (in practice, a symmetric range such as
+    $[-4\sigma,4\sigma]$), and
+    \item a rectangular grid over $(\log S,\delta)$ covering an economically relevant range.
+\end{enumerate}
+For each $(\log S,\delta)$ cell, the script computes $\Delta(v;S,\delta)$ over the entire $v$ grid and
+stores the implied best response
+\[
+    a^\star(v;S,\delta)=\mathbf{1}\{\Delta(v;S,\delta)\ge 0\},
+\]
+using the same tie-break convention in all downstream scripts. The output is written as a large dataset \texttt{single\_agent\_grid.csv} under
+\texttt{computational/output/datasets/}.
+
+\paragraph{Step 2: compress to cutoffs and action rates.}
+The runner \texttt{computational/R/runners/02\_cutoffs\_and\_action\_rates.R} reads the raw grid dataset and
+produces a compact summary table indexed by $(\log S,\delta)$ that contains:
+\begin{itemize}
+    \item a cutoff $v^\star(\log S,\delta)$ defined as the \emph{first} $v$ on the grid where
+    $\Delta(v;S,\delta)\ge 0$ (and $v^\star=+\infty$ if no such $v$ exists), and
+    \item an implied action rate $\Pr(a^\star=1\mid \log S,\delta)$ obtained by numerically integrating
+    the indicator $a^\star(v;S,\delta)$ under $v\sim\mathcal{N}(0,\sigma^2)$.
+\end{itemize}
+The script also diagnoses whether $a^\star(v;S,\delta)$ is consistent with a \emph{single cutoff} in $v$
+(by counting the number of switches in $a^\star$ along the ordered $v$ grid). When the cutoff property holds,
+the action rate can equivalently be computed from the cutoff via the normal CDF; when it fails, the script
+reports the model-implied action rate computed from the full (possibly non-monotone) pattern of $a^\star(v)$.
+The summary output is written to \texttt{cutoffs\_and\_action\_rates.csv} under
+\texttt{computational/output/derived/}.
+
+\paragraph{Step 3: diagnostics for non-monotone cells.}
+The analysis script \texttt{computational/R/analysis/03\_diagnose\_nonmonotone\_cells.R} provides additional
+checks for $(\log S,\delta)$ cells where $a^\star(v)$ switches two or more times as $v$ increases. It performs
+robustness checks to small numerical tolerances, optionally recomputes $\Delta(v)$ on a much denser $v$ grid for
+selected cells, and writes a compact diagnostics table plus simple plots under
+\texttt{computational/output/diagnostics/}.
+
+\subsection{Outputs and file locations}\label{subsec:sim_outputs}
+
+The simulation pipeline produces the following:
+\begin{itemize}
+    \item \texttt{computational/output/datasets/single\_agent\_grid.csv}: raw grid evaluations of
+    $(u_0,u_1,\Delta,a^\star)$ over $(v,\log S,\delta)$.
+    \item \texttt{computational/output/derived/cutoffs\_and\_action\_rates.csv}: compressed per-cell summary
+    including cutoffs, implied action rates, and monotonicity diagnostics.
+    \item \texttt{computational/output/diagnostics/nonmonotone\_cells\_diagnostics.csv} and
+    \texttt{computational/output/diagnostics/figures/}: targeted diagnostics for multi-switch cells.
+    \item \texttt{computational/output/manifests/*.json}: manifests that record parameter settings and hashes
+    for generated outputs (useful for reproducibility).
+\end{itemize}
+
+\subsection{Simulation results}\label{subsec:sim_interpret}
+
+The simulation outputs are most useful as a diagnostic for the shape of incentives and best
+responses across $(\log S,\delta)$, and for understanding when the analytical cutoff logic provides
+a good approximation to global behavior.
+
+By construction, the best response is computed from
+\[
+    \Delta(v;S,\delta) = u_1(v;S,\delta) - u_0(v;S)
+    = p_1(v;S)\,\Phi(v-\delta) - p_0(v;S)\,\Phi(v),
+\]
+with $p_0(v;S)=\exp(v)/(\exp(v)+S)$ and $p_1(v;S)=\exp(v+1)/(\exp(v+1)+S)$.
+Every pattern in the simulated best response can be interpreted as a contest between:
+(i) a \emph{primary-stage} nomination gain (increasing $p$ via shifting $v\mapsto v+1$) and
+(ii) a \emph{general-election} electability cost (shifting $\Phi(v)$ to $\Phi(v-\delta)$).
+
+A convenient way to read the results is through the ratio condition emphasized in the analytical
+notes: $a^\star=1$ is favored when the proportional nomination gain outweighs the proportional
+electability cost.
+
+The derived file \texttt{cutoffs\_and\_action\_rates.csv} summarizes each $(\log S,\delta)$ cell by a cutoff
+$v^\star(\log S,\delta)$ (the first grid point where $\Delta\ge 0$) and by the implied action rate
+$\Pr(a^\star=1\mid \log S,\delta)$ under $v\sim\mathcal{N}(0,\sigma^2)$.
+
+Interpreting these objects:
+\begin{itemize}
+    \item When $v^\star(\log S,\delta)$ is finite and the cutoff diagnostic indicates a single switch,
+    the simulation supports a clean threshold interpretation: action $a=1$ is optimal for sufficiently
+    high (or sufficiently low) $v$ depending on the sign pattern of $\Delta(v)$, and the implied action
+    rate is tightly linked to the normal tail probability beyond the cutoff.
+    \item When $v^\star(\log S,\delta)=+\infty$ (``always 0'' in the summary), it indicates that on the
+    relevant grid region, the electability cost dominates: $\Delta(v;S,\delta)<0$ for all $v$ considered.
+    \item When the summary flags non-cutoff behavior (two or more switches in $a^\star(v)$), the single-crossing
+    cutoff logic is \emph{not globally valid} for that parameter cell. In those regions, it is more appropriate
+    to think of best responses as potentially featuring ``islands'' of $a=1$ in $v$, and to treat any cutoff-based
+    analytical claims as local or conditional.
+\end{itemize}
+
+Cells with multiple switches are those where the gain--cost tradeoff is nontrivial in $v$.
+the primary-stage gain from shifting $v$ by $+1$ is inherently nonlinear because $p(v;S)$ is logistic,
+and the general-election term $\Phi(v-\delta)$ is also nonlinear in $v$ (especially in the tails).
+
+Practically, this should shape how the analytical results are used:
+\begin{itemize}
+    \item Treat results that rely on monotonicity / single-crossing as \emph{parameter-restricted}
+    statements, and use the simulation to map the region of $(\log S,\delta)$ where those restrictions
+    appear satisfied.
+    \item In regions with non-monotone $a^\star(v)$, summarize behavior using action rates (integrated over $v$)
+    rather than a single cutoff, and interpret comparative statics in terms of changes in these rates.
+\end{itemize}
+
+The implied action rate $\Pr(a^\star=1\mid \log S,\delta)$ should be interpreted as a model-implied frequency
+of choosing $a=1$ in a population of candidates with heterogeneous $v$. This object is useful because it
+(i) focuses on the ``relevant'' region of $v$ under the chosen reference distribution and
+(ii) remains well-defined even when $a^\star(v)$ is not a clean cutoff.
+
+Accordingly, the action-rate surface over $(\log S,\delta)$ is a natural summary of how the model's
+behavior changes with opponent strength and the severity of the general-election penalty, and it provides
+a bridge between the analytical conditions and quantitative magnitudes.
