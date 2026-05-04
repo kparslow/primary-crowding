@@ -4,22 +4,20 @@ on:
   workflow_dispatch:
     inputs:
       root_file:
-        description: "Path to the main .tex file to compile (relative to repo root)"
+        description: Path to the main .tex file to compile (relative to repo root)
         required: true
-        default: "paper/notes/tech/tech_building_blocks.tex"
+        default: paper/notes/tech/tech_building_blocks.tex
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   build-latex:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Compile LaTeX
-        uses: xu-cheng/latex-action@v3
+      - uses: xu-cheng/latex-action@v3
         with:
           root_file: ${{ inputs.root_file }}
           args: -halt-on-error -file-line-error
@@ -30,18 +28,13 @@ jobs:
           pdf="${{ inputs.root_file }}"
           pdf="${pdf%.tex}.pdf"
           echo "PDF_PATH=$pdf" >> "$GITHUB_ENV"
-          echo "Will upload: $pdf"
 
       - name: Debug: list PDFs
         shell: bash
         run: |
-          echo "Listing PDFs under repo..."
-          find . -maxdepth 6 -type f -name "*.pdf" -print || true
-          echo "Listing paper/notes/tech..."
-          ls -R paper/notes/tech || true
+          find . -maxdepth 8 -type f -name "*.pdf" -print || true
 
-      - name: Upload PDF artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: latex-pdf
           path: ${{ env.PDF_PATH }}
