@@ -26,6 +26,17 @@ jobs:
         with:
           root_file: ${{ inputs.root_file }}
           args: -halt-on-error -file-line-error
+          
+      - name: Debug: show TeX outputs
+        if: always()
+        shell: bash
+        run: | 
+        echo "List tech dir:"
+        ls -la paper/notes/tech || true
+        echo "Find any PDFs anywhere:"
+        find . -type f -name "*.pdf" -print || true
+        echo "Find LaTeX logs:"
+        find . -type f \( -name "*.log" -o -name "*.fls" -o -name "*.aux" \) -maxdepth 6 -print || true
 
       - name: Compute PDF path
         shell: bash
