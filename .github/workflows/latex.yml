@@ -20,8 +20,16 @@ jobs:
         with:
           root_file: ${{ inputs.root_file }}
 
+      - name: Compute PDF path
+        shell: bash
+        run: |
+          pdf="${{ inputs.root_file }}"
+          pdf="${pdf%.tex}.pdf"
+          echo "PDF_PATH=$pdf" >> "$GITHUB_ENV"
+          echo "Will upload: $pdf"
+
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v4
         with:
           name: latex-pdf
-          path: ${{ github.workspace }}/${{ inputs.root_file }}.pdf
+          path: ${{ env.PDF_PATH }}
