@@ -14,10 +14,14 @@ env:
 jobs:
   build-latex:
     runs-on: ubuntu-latest
+    env:
+      ROOT_FILE: ${{ inputs.root_file }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: xu-cheng/latex-action@v3
+      - name: Compile LaTeX
+        uses: xu-cheng/latex-action@v3
         with:
           root_file: ${{ inputs.root_file }}
           args: -halt-on-error -file-line-error
@@ -25,16 +29,20 @@ jobs:
       - name: Compute PDF path
         shell: bash
         run: |
-          pdf="${{ inputs.root_file }}"
-          pdf="${pdf%.tex}.pdf"
+          pdf="${ROOT_FILE%.tex}.pdf"
           echo "PDF_PATH=$pdf" >> "$GITHUB_ENV"
+          echo "Will upload: $pdf"
 
       - name: Debug: list PDFs
         shell: bash
         run: |
+          echo "ROOT_FILE=$ROOT_FILE"
+          echo "PDF_PATH=$PDF_PATH"
+          echo "PDFs found:"
           find . -maxdepth 8 -type f -name "*.pdf" -print || true
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
         with:
           name: latex-pdf
           path: ${{ env.PDF_PATH }}
