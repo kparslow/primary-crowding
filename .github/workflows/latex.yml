@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ROOT_FILE: ${{ inputs.root_file }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,15 +32,6 @@ jobs:
         run: |
           pdf="${ROOT_FILE%.tex}.pdf"
           echo "PDF_PATH=$pdf" >> "$GITHUB_ENV"
-          echo "Will upload: $pdf"
-
-      - name: Debug: list PDFs
-        shell: bash
-        run: |
-          echo "ROOT_FILE=$ROOT_FILE"
-          echo "PDF_PATH=$PDF_PATH"
-          echo "PDFs found:"
-          find . -maxdepth 8 -type f -name "*.pdf" -print || true
 
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v4
