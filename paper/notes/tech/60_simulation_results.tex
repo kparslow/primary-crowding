@@ -2,171 +2,100 @@
 
 \subsection{Purpose and role of the simulation}\label{subsec:sim_purpose}
 
-The analytical results in these notes characterize best responses in terms of model primitives and
-comparisons of the form
+The analytical results characterize best responses through the incentive difference
 \[
-    \Delta(v;S,\delta) \equiv u_1(v;S,\delta) - u_0(v;S)
-    \quad\text{and}\quad
+    \Delta(v;S,\delta) \equiv u_1(v;S,\delta) - u_0(v;S),
+    \qquad
     a^\star(v;S,\delta)=\mathbf{1}\{\Delta(v;S,\delta)\ge 0\}.
 \]
-The work in the \texttt{computational/} folder plays a supporting role by numerically evaluating these objects on a dense grid of parameter values in order to (i) visualize
-comparative statics, (ii) compute summary objects such as cutoffs and implied action rates, and
-(iii) diagnose whether the best response behaves like a single-crossing cutoff in $v$ for each
-$(S,\delta)$ cell.
-
-The scripts generate \emph{model-implied} outcomes
-from the primitives and the best-response rule, and then aggregate those outcomes into compact
-tables that can be inspected, plotted, or used as inputs to additional analysis.
+The \texttt{computational/} code supports the theory by numerically evaluating $\Delta$ and $a^\star$ on a dense
+grid in $(v,\log S,\delta)$ in order to (i) visualize comparative statics, (ii) compress outcomes into cutoffs and
+action rates, and (iii) diagnose when $a^\star(v)$ behaves like a single-crossing cutoff.
 
 \subsection{How the model is simulated (core model \& helpers)}\label{subsec:sim_how}
 
-All simulation code is implemented in R and is organized into:
+All simulation code is implemented in R and organized into:
 \begin{itemize}
-    \item \textbf{Core model functions} in \texttt{computational/R/functions/model.R}. These define
-    the payoff objects $u_0(\cdot)$ and $u_1(\cdot)$ and the incentive difference
-    $\Delta(\cdot)$ (exposed as \texttt{Delta\_incentive()} in code), which is the key object used
-    to construct best responses.
-    \item \textbf{Grid construction helpers} in \texttt{computational/R/functions/grids.R}. These
-    provide convenience functions to create evaluation grids over $v$ and over the parameter pair
-    $(\log S,\delta)$.
-    \item \textbf{Manifest / reproducibility helpers} in \texttt{computational/R/functions/manifest.R}.
-    The main grid runner writes a small JSON manifest recording the script path, parameter settings,
-    and hashes/sizes of generated outputs.
+    \item \textbf{Core model functions} in \texttt{computational/R/functions/model.R}. These define $u_0(\cdot)$,
+    $u_1(\cdot)$, and $\Delta(\cdot)$ (exposed as \texttt{Delta\_incentive()}).
+    \item \textbf{Grid construction helpers} in \texttt{computational/R/functions/grids.R}. These create evaluation
+    grids over $v$ and over $(\log S,\delta)$.
+    \item \textbf{Manifest / reproducibility helpers} in \texttt{computational/R/functions/manifest.R}. Runners write
+    JSON manifests recording settings and output hashes/sizes.
 \end{itemize}
 
-Fix $\sigma>0$ and interpret candidate valence as distributed
+I interpret candidate valence as distributed
 \[
-    v \sim \mathcal{N}(0,\sigma^2).
+    v \sim \mathcal{N}(0,\sigma^2),
 \]
-For aggregation and summary statistics, I treat candidate valence as a random draw
-$v\sim\mathcal{N}(0,\sigma^2)$ for primarily computational reasons. The model objects can
-be evaluated for very large $|v|$, but on a finite grid the extreme tails are both (i) empirically
-less relevant and (ii) a source of numerical instability when computing ratios and
-differences of probabilities. Using a normal reference distribution focuses attention on the
-region of $v$ where most mass lies and yields stable numerical integrals for implied action rates.
+and use this distribution only for aggregation and summary statistics. On a finite grid, extreme tails of $v$ are
+both empirically less relevant and a source of numerical instability when computing probability ratios and
+differences. Using a normal reference distribution focuses computation on the region of $v$ where most mass lies and
+yields stable numerical integrals for implied action rates. I keep $\sigma$ explicit as a scale parameter and choose
+$v$-ranges in multiples of $\sigma$ (e.g.\ $v\in[-4\sigma,4\sigma]$).
 
-I keep $\sigma$ explicit as a scale parameter for valence. Numerical grids and penalty magnitudes
-are chosen in multiples of $\sigma$ (e.g.\ $v\in[-4\sigma,4\sigma]$), which makes the computations
-comparable across alternative calibrations of the dispersion of $v$.
-
-I grid over $\log S$ rather than $S$ directly. This ensures $S>0$ by construction and provides a
-numerically well-behaved grid that samples $S$ multiplicatively (i.e.\ in equal log steps) across
-orders of magnitude.
+I grid over $\log S$ rather than $S$ directly. This enforces $S>0$ and samples $S$ multiplicatively (equal steps in
+$\log S$ correspond to equal percentage changes in $S$), which is more numerically stable over wide ranges.
 
 \paragraph{Step 1: evaluate incentives and best responses on a grid.}
-The runner \texttt{computational/R/runners/01\_single\_agent\_grid.R} constructs:
-\begin{enumerate}
-    \item a dense grid for $v$ over a bounded interval (in practice, a symmetric range such as
-    $[-4\sigma,4\sigma]$), and
-    \item a rectangular grid over $(\log S,\delta)$ covering an economically relevant range.
-\end{enumerate}
-For each $(\log S,\delta)$ cell, the script computes $\Delta(v;S,\delta)$ over the entire $v$ grid and
-stores the implied best response
-\[
-    a^\star(v;S,\delta)=\mathbf{1}\{\Delta(v;S,\delta)\ge 0\},
-\]
-using the same tie-break convention in all downstream scripts. The output is written as a large dataset \texttt{single\_agent\_grid.csv} under
-\texttt{computational/output/datasets/}.
+The runner \texttt{computational/R/runners/01\_single\_agent\_grid.R} constructs (i) a dense $v$ grid on a bounded
+interval and (ii) a rectangular grid over $(\log S,\delta)$. For each $(\log S,\delta)$ cell it evaluates
+$\Delta(v;S,\delta)$ over the $v$ grid and stores the implied best response $a^\star(v;S,\delta)$ using a fixed
+tie-break convention. Output: \texttt{computational/output/datasets/single\_agent\_grid.csv}.
 
 \paragraph{Step 2: compress to cutoffs and action rates.}
-The runner \texttt{computational/R/runners/02\_cutoffs\_and\_action\_rates.R} reads the raw grid dataset and
-produces a compact summary table indexed by $(\log S,\delta)$ that contains:
+The runner \texttt{computational/R/runners/02\_cutoffs\_and\_action\_rates.R} summarizes each $(\log S,\delta)$ cell
+with:
 \begin{itemize}
-    \item a cutoff $v^\star(\log S,\delta)$ defined as the \emph{first} $v$ on the grid where
-    $\Delta(v;S,\delta)\ge 0$ (and $v^\star=+\infty$ if no such $v$ exists), and
-    \item an implied action rate $\Pr(a^\star=1\mid \log S,\delta)$ obtained by numerically integrating
-    the indicator $a^\star(v;S,\delta)$ under $v\sim\mathcal{N}(0,\sigma^2)$.
+    \item a cutoff $v^\star(\log S,\delta)$ defined as the first $v$ on the grid where $\Delta(v;S,\delta)\ge 0$
+    (with $v^\star=+\infty$ if no such $v$ exists), and
+    \item an implied action rate $\Pr(a^\star=1\mid \log S,\delta)$ computed by numerically integrating
+    $a^\star(v;S,\delta)$ under $v\sim\mathcal{N}(0,\sigma^2)$.
 \end{itemize}
-The script also diagnoses whether $a^\star(v;S,\delta)$ is consistent with a \emph{single cutoff} in $v$
-(by counting the number of switches in $a^\star$ along the ordered $v$ grid). When the cutoff property holds,
-the action rate can equivalently be computed from the cutoff via the normal CDF; when it fails, the script
-reports the model-implied action rate computed from the full (possibly non-monotone) pattern of $a^\star(v)$.
-The summary output is written to \texttt{cutoffs\_and\_action\_rates.csv} under
-\texttt{computational/output/derived/}.
+The script also counts the number of switches in $a^\star(v)$ along the ordered $v$ grid to diagnose whether the best
+response is consistent with a single cutoff. Output: \texttt{computational/output/derived/cutoffs\_and\_action\_rates.csv}.
 
-\paragraph{Step 3: diagnostics for non-monotone cells.}
-The analysis script \texttt{computational/R/analysis/03\_diagnose\_nonmonotone\_cells.R} provides additional
-checks for $(\log S,\delta)$ cells where $a^\star(v)$ switches two or more times as $v$ increases. It performs
-robustness checks to small numerical tolerances, optionally recomputes $\Delta(v)$ on a much denser $v$ grid for
-selected cells, and writes a compact diagnostics table plus simple plots under
-\texttt{computational/output/diagnostics/}.
+\paragraph{Step 3: targeted diagnostics for non-monotone cells.}
+The analysis script \texttt{computational/R/analysis/03\_diagnose\_nonmonotone\_cells.R} focuses on cells where
+$a^\star(v)$ switches two or more times. It checks robustness to small numerical tolerances and can recompute
+$\Delta(v)$ on a denser $v$ grid for selected cells. Outputs are written under \texttt{computational/output/diagnostics/}.
 
-\subsection{Interpreting Output \& Results}\label{subsec:sim_interpret}
+\subsection{How to read the numerical output}\label{subsec:sim_interpret}
 
-The simulation outputs are most useful as a diagnostic for the shape of incentives and best
-responses across $(\log S,\delta)$, and for understanding when the analytical cutoff logic provides
-a good approximation to global behavior.
+The simulation output is designed to answer two questions: (i) is the best response approximately a single cutoff in
+$v$ for each $(\log S,\delta)$ cell, and (ii) how often is $a=1$ chosen in a heterogeneous population of candidates?
 
-By construction, the best response is computed from
-\[
-    \Delta(v;S,\delta) = u_1(v;S,\delta) - u_0(v;S)
-    = p_1(v;S)\,\Phi(v-\delta) - p_0(v;S)\,\Phi(v),
-\]
-with $p_0(v;S)=\exp(v)/(\exp(v)+S)$ and $p_1(v;S)=\exp(v+1)/(\exp(v+1)+S)$.
-Every pattern in the simulated best response can be interpreted as a contest between:
-(i) a \emph{primary-stage} nomination gain (increasing $p$ via shifting $v\mapsto v+1$) and
-(ii) a \emph{general-election} electability cost (shifting $\Phi(v)$ to $\Phi(v-\delta)$).
-
-A convenient way to read the results is through the ratio condition emphasized in the analytical
-notes: $a^\star=1$ is favored when the proportional nomination gain outweighs the proportional
-electability cost.
-
-The derived file \texttt{cutoffs\_and\_action\_rates.csv} summarizes each $(\log S,\delta)$ cell by a cutoff
-$v^\star(\log S,\delta)$ (the first grid point where $\Delta\ge 0$) and by the implied action rate
-$\Pr(a^\star=1\mid \log S,\delta)$ under $v\sim\mathcal{N}(0,\sigma^2)$.
-
-Interpreting these objects:
+\paragraph{Regimes.}
+Each $(\log S,\delta)$ cell is classified by the pattern of $a^\star(v)$ across the $v$ grid:
 \begin{itemize}
-    \item When $v^\star(\log S,\delta)$ is finite and the cutoff diagnostic indicates a single switch,
-    the simulation supports a clean threshold interpretation: action $a=1$ is optimal for sufficiently
-    high (or sufficiently low) $v$ depending on the sign pattern of $\Delta(v)$, and the implied action
-    rate is tightly linked to the normal tail probability beyond the cutoff.
-    \item When $v^\star(\log S,\delta)=+\infty$ (``always 0'' in the summary), it indicates that on the
-    relevant grid region, the electability cost dominates: $\Delta(v;S,\delta)<0$ for all $v$ considered.
-    \item When the summary flags non-cutoff behavior (two or more switches in $a^\star(v)$), the single-crossing
-    cutoff logic is \emph{not globally valid} for that parameter cell. In those regions, it is more appropriate
-    to think of best responses as potentially featuring ``islands'' of $a=1$ in $v$, and to treat any cutoff-based
-    analytical claims as local or conditional.
+    \item \texttt{always0}: $a^\star(v)=0$ for all $v$ on the grid (the action is dominated on the evaluated range);
+    \item \texttt{always1}: $a^\star(v)=1$ for all $v$ on the grid (the action is optimal on the evaluated range);
+    \item \texttt{cutoff\_ok}: exactly one switch in $a^\star(v)$ (a single cutoff $v^\star$ summarizes the cell);
+    \item \texttt{nonmonotone}: two or more switches (the single-cutoff summary is not informative on its own).
 \end{itemize}
 
-Cells with multiple switches are those where the gain--cost tradeoff is nontrivial in $v$.
-The primary-stage gain from shifting $v$ by $+1$ is inherently nonlinear because $p(v;S)$ is logistic,
-and the general-election term $\Phi(v-\delta)$ is also nonlinear in $v$ (especially in the tails).
+\paragraph{Action rates.}
+The implied action rate $\Pr(a^\star=1\mid \log S,\delta)$ integrates the best response over
+$v\sim\mathcal{N}(0,\sigma^2)$. It remains well-defined regardless of whether $a^\star(v)$ is a clean cutoff, and it
+is the main quantitative object used to summarize behavior across $(\log S,\delta)$.
 
-Practically, this should shape how the analytical results are used:
+\subsection{Simulation results (action-rate and cutoff summaries)}\label{subsec:sim_results}
+
+Below is a summary of numerical results on the baseline grid. All figures referenced below are generated by
+\texttt{computational/R/analysis/results\_cutoffs\_action\_rates.R} and saved under
+\texttt{computational/output/results/figures/}.
+
+\paragraph{Cutoff logic holds for almost all parameter cells.}
+Across the $(\log S,\delta)$ grid (1681 cells), the best response is overwhelmingly either constant in $v$ or a
+single-switch cutoff. Regime shares are:
 \begin{itemize}
-    \item Treat results that rely on monotonicity / single-crossing as \emph{parameter-restricted}
-    statements, and use the simulation to map the region of $(\log S,\delta)$ where those restrictions
-    appear satisfied.
-    \item In regions with non-monotone $a^\star(v)$, summarize behavior using action rates (integrated over $v$)
-    rather than a single cutoff, and interpret comparative statics in terms of changes in these rates.
+    \item \texttt{always0}: 572 cells (34.0\%);
+    \item \texttt{always1}: 80 cells (4.76\%);
+    \item \texttt{cutoff\_ok}: 1010 cells (60.1\%);
+    \item \texttt{nonmonotone}: 19 cells (1.13\%).
 \end{itemize}
-
-The implied action rate $\Pr(a^\star=1\mid \log S,\delta)$ should be interpreted as a model-implied frequency
-of choosing $a=1$ in a population of candidates with heterogeneous $v$. This object is useful because it
-(i) focuses on the ``relevant'' region of $v$ under the chosen reference distribution and
-(ii) remains well-defined even when $a^\star(v)$ is not a clean cutoff.
-
-Accordingly, the action-rate surface over $(\log S,\delta)$ is a natural summary of how the model's
-behavior changes with opponent strength and the severity of the general-election penalty, and it provides
-a bridge between the analytical conditions and quantitative magnitudes.
-
-\subsection{Simulation results}\label{subsec:sim_results}
-
-The reported statistics are computed from the derived per-cell summary \texttt{cutoffs\_and\_action\_rates.csv} and from the additional results tables/figures
-produced by \texttt{computational/R/analysis/results\_cutoffs\_action\_rates.R}.
-
-\paragraph{Best-response shape in $v$: cutoff behavior dominates.}
-Across the $(\log S,\delta)$ grid (1681 cells), the best response $a^\star(v;S,\delta)$ is typically either
-constant in $v$ or a single-switch cutoff:
-\begin{itemize}
-    \item 34.0\% of cells are \texttt{always0} (i.e., $a^\star\equiv 0$ on the $v$-grid);
-    \item 4.76\% of cells are \texttt{always1} (i.e., $a^\star\equiv 1$ on the $v$-grid);
-    \item 60.1\% of cells exhibit exactly one switch in $a^\star(v)$ (a clean cutoff);
-    \item multi-switch (nonmonotone) behavior is rare, occurring in 19 cells (1.13\%).
-\end{itemize}
-The spatial pattern of these regimes over $(\log S,\delta)$ is shown by the regime map in
-Figure~\ref{fig:sim_regime_map}.
+Figure~\ref{fig:sim_regime_map} plots these regimes over $(\log S,\delta)$ and highlights that multi-switch behavior
+is confined to a small subset of the grid.
 
 \begin{figure}[t]
     \centering
@@ -175,12 +104,11 @@ Figure~\ref{fig:sim_regime_map}.
     \label{fig:sim_regime_map}
 \end{figure}
 
-\paragraph{Implied action rates are polarized.}
-Aggregating over candidate types $v\sim\mathcal{N}(0,\sigma^2)$, the implied action rate
-$\Pr(a^\star=1\mid \log S,\delta)$ is highly dispersed and often close to a corner:
-the median action rate across cells is $9.0\times 10^{-4}$, while the 75th percentile is 0.101,
-the 90th percentile is 0.875, and the 95th percentile is 0.999. The surface of implied action rates
-over $(\log S,\delta)$ is summarized by Figure~\ref{fig:sim_action_rate_heatmap}.
+\paragraph{Action rates are polarized across the grid.}
+The implied action rate $\Pr(a^\star=1\mid \log S,\delta)$ is highly dispersed:
+the median action rate is $9.0\times 10^{-4}$; the 75th percentile is 0.101; the 90th percentile is 0.875; and the
+95th percentile is 0.999. Figure~\ref{fig:sim_action_rate_heatmap} shows the full action-rate surface over
+$(\log S,\delta)$.
 
 \begin{figure}[t]
     \centering
@@ -189,14 +117,12 @@ over $(\log S,\delta)$ is summarized by Figure~\ref{fig:sim_action_rate_heatmap}
     \label{fig:sim_action_rate_heatmap}
 \end{figure}
 
-\paragraph{Cutoff approximation is numerically accurate when single-crossing holds.}
-In cells where a cutoff characterization applies and the script reports a cutoff-implied rate
+\paragraph{Cutoff surface and numerical accuracy of cutoff-based aggregation.}
+When a single-switch cutoff applies and the script reports a cutoff-implied action rate
 (\texttt{action\_rate\_cutoff} is non-missing; 1662 cells), the cutoff-implied and numerically integrated action
-rates are extremely close: the median absolute difference is $2.69\times 10^{-5}$, the 90th percentile is
-$8.93\times 10^{-4}$, and the maximum is $1.30\times 10^{-3}$. This supports using the cutoff summary
-$v^\star(\log S,\delta)$ (together with the normal CDF) as a reliable quantitative approximation in the region
-where $a^\star(v)$ is single-crossing. The implied cutoff surface (with $v^\star=+\infty$ masked) is shown in
-Figure~\ref{fig:sim_vstar_heatmap}.
+rates are very close: the median absolute difference is $2.69\times 10^{-5}$, the 90th percentile is
+$8.93\times 10^{-4}$, and the maximum is $1.30\times 10^{-3}$. The implied cutoff surface is shown in
+Figure~\ref{fig:sim_vstar_heatmap} (with $v^\star=+\infty$ masked and the color scale capped for readability).
 
 \begin{figure}[t]
     \centering
@@ -205,43 +131,42 @@ Figure~\ref{fig:sim_vstar_heatmap}.
     \label{fig:sim_vstar_heatmap}
 \end{figure}
 
-\paragraph{Frontiers in $(\log S,\delta)$.}
-A useful summary of parameter dependence is via empirical ``frontiers'': for each $\log S$, the script records
-the smallest $\delta$ at which the model is \texttt{always0} and the largest $\delta$ at which it is \texttt{always1}
-(see \texttt{frontiers\_by\_logS.csv}). The \texttt{always0} frontier $\delta_{\text{always0}}(\log S)$ rises with
-$\log S$ over the explored range (e.g., from 0.52 at $\log S=-4$ to 1.78 at $\log S=0$ and 2.50 at $\log S=1.8$),
-consistent with the interpretation that when the opponent is stronger (higher $S$), the nomination gain from action
-$a=1$ can justify a larger general-election penalty $\delta$.
+
+For each $\log S$, the results script records the smallest $\delta$ at which the model is \texttt{always0} and the
+largest $\delta$ at which it is \texttt{always1} (see \texttt{computational/output/results/tables/frontiers\_by\_logS.csv}).
+The \texttt{always0} frontier $\delta_{\text{always0}}(\log S)$ rises with $\log S$ over the explored range (e.g.,
+0.52 at $\log S=-4$, 1.78 at $\log S=0$, and 2.50 at $\log S=1.8$), consistent with the interpretation that when the
+opponent is stronger (higher $S$), the nomination gain from action $a=1$ can justify a larger general-election
+penalty $\delta$.
 
 \paragraph{Caveat: regime shares depend on the chosen grid.}
-The reported fractions of \texttt{always0} and \texttt{always1} cells are properties of the \emph{finite grid}
-of $(\log S,\delta)$ values explored (in particular the maximum $\delta$). Extending the grid to higher $\delta$
-mechanically increases the number of cells classified as \texttt{always0}. For this reason, the frontier objects
-(e.g.\ $\delta_{\text{always0}}(\log S)$) and the action-rate surface (Figure~\ref{fig:sim_action_rate_heatmap})
-are more informative than raw regime shares.
+The reported fractions of \texttt{always0} and \texttt{always1} cells are properties of the finite
+$(\log S,\delta)$ grid (in particular $\delta_{\max}$). Extending the grid to higher $\delta$ mechanically increases
+the number of \texttt{always0} cells. For this reason, the frontier objects and the action-rate surface
+(Figure~\ref{fig:sim_action_rate_heatmap}) are more informative than raw regime shares.
 
 \subsection{Outputs and file locations}\label{subsec:sim_outputs}
 
-The simulation pipeline produces (at least) the following artifacts.
+The pipeline produces raw outputs, derived summaries, and paper-ready results tables/figures.
 
 \paragraph{Raw grid output (large, local).}
 \begin{itemize}
     \item \texttt{computational/output/datasets/single\_agent\_grid.csv}: raw grid evaluations of
-    $(u_0,u_1,\Delta,a^\star)$ over $(v,\log S,\delta)$. This file can be very large and is primarily used for
-    targeted mechanism plots (e.g.\ $\Delta(v)$ and $a^\star(v)$ in selected cells) and for debugging.
+    $(u_0,u_1,\Delta,a^\star)$ over $(v,\log S,\delta)$. This file can be very large; the main workflow uses it only
+    for targeted inspection (e.g.\ plotting $\Delta(v)$ and $a^\star(v)$ for selected cells) and for debugging.
 \end{itemize}
 
 \paragraph{Derived per-cell summaries (small).}
 \begin{itemize}
-    \item \texttt{computational/output/derived/cutoffs\_and\_action\_rates.csv}: compressed per-cell summary indexed
-    by $(\log S,\delta)$ including $v^\star$, implied action rates, and monotonicity diagnostics.
+    \item \texttt{computational/output/derived/cutoffs\_and\_action\_rates.csv}: per-cell summary indexed by
+    $(\log S,\delta)$ including $v^\star$, implied action rates, and switch-count diagnostics.
 \end{itemize}
 
 \paragraph{Results tables and figures for these notes.}
 Running \texttt{computational/R/analysis/results\_cutoffs\_action\_rates.R} produces:
 \begin{itemize}
     \item Tables under \texttt{computational/output/results/tables/}, including:
-    \texttt{grid\_info.csv} (grid bounds for interpretation),
+    \texttt{grid\_info.csv},
     \texttt{regime\_counts.csv},
     \texttt{switch\_count\_distribution.csv},
     \texttt{action\_rate\_quantiles.csv},
@@ -250,19 +175,19 @@ Running \texttt{computational/R/analysis/results\_cutoffs\_action\_rates.R} prod
     \texttt{cutoff\_approx\_error\_by\_regime.csv}, and
     \texttt{frontiers\_by\_logS.csv}.
     \item Figures under \texttt{computational/output/results/figures/}:
-    \texttt{heatmap\_action\_rate.png} (Figure~\ref{fig:sim_action_rate_heatmap}),
-    \texttt{heatmap\_v\_star.png} (Figure~\ref{fig:sim_vstar_heatmap}), and
-    \texttt{regime\_map.png} (Figure~\ref{fig:sim_regime_map}).
+    \texttt{heatmap\_action\_rate.png},
+    \texttt{heatmap\_v\_star.png}, and
+    \texttt{regime\_map.png}.
 \end{itemize}
 
-\paragraph{Diagnostics for non-monotone cells (optional).}
+\paragraph{Optional diagnostics.}
 \begin{itemize}
     \item \texttt{computational/output/diagnostics/nonmonotone\_cells\_diagnostics.csv} and
     \texttt{computational/output/diagnostics/figures/}: targeted diagnostics for cells in which $a^\star(v)$ switches
     multiple times.
 \end{itemize}
 
-\paragraph{Manifests (reproducibility).}
+\paragraph{Manifests.}
 \begin{itemize}
     \item \texttt{computational/output/manifests/*.json}: manifests recording run parameters and hashes/sizes of
     generated outputs.
