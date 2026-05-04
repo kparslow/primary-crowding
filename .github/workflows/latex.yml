@@ -8,6 +8,9 @@ on:
         required: true
         default: "paper/notes/tech/tech_building_blocks.tex"
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-latex:
     runs-on: ubuntu-latest
@@ -19,6 +22,7 @@ jobs:
         uses: xu-cheng/latex-action@v3
         with:
           root_file: ${{ inputs.root_file }}
+          args: -halt-on-error -file-line-error
 
       - name: Compute PDF path
         shell: bash
@@ -27,6 +31,13 @@ jobs:
           pdf="${pdf%.tex}.pdf"
           echo "PDF_PATH=$pdf" >> "$GITHUB_ENV"
           echo "Will upload: $pdf"
+
+      - name: Debug: list PDFs
+        run: |
+          echo "Listing PDFs under repo..."
+          find . -maxdepth 6 -type f -name "*.pdf" -print
+          echo "Listing paper/notes/tech..."
+          ls -R paper/notes/tech || true
 
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v4
